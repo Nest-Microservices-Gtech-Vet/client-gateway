@@ -4,6 +4,7 @@ import * as joi from 'joi';
 interface EnvVars {
     PORT: number;
     
+    JWT_SECRET: string;
     USERS_MICROSERVICE_HOST: string;
     USERS_MICROSERVICE_PORT: number;
 
@@ -13,7 +14,7 @@ interface EnvVars {
 
 const envsSchema = joi.object({
     PORT: joi.number().required(),
-    
+    JWT_SECRET: joi.string().required(),
 
     USERS_MICROSERVICE_HOST: joi.string().required(),
     USERS_MICROSERVICE_PORT: joi.number().required(),
@@ -31,7 +32,8 @@ if (error) {
 
 export const envs = {
     port: value.PORT,
-    
+    jwtSecret: value.JWT_SECRET,
+
     usersMicroservicesHost: value.USERS_MICROSERVICE_HOST,
     usersMicroservicesPort: value.USERS_MICROSERVICE_PORT,
 

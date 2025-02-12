@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query, Req, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query, Req, UnauthorizedException, UseGuards } from '@nestjs/common';
 import { ClientProxy, Payload, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { PaginationDto } from 'src/common';
@@ -15,9 +15,23 @@ export class UsersController {
   ) { }
 
   @Post()
-  createProduct(@Body() createUserDto: CreateUserDto) {
-    return this.usersClient.send({ cmd: 'create_users' }, createUserDto);
+  @UseGuards(JwtAuthGuard)
+  async createUser(@Body() createUserDto: CreateUserDto, @Req() request) {
+    const authToken = request.headers.authorization; // 🔥 Extrae el token del header
+
+  if (!authToken) {
+    console.error('❌ No Authorization header en la solicitud a usuarios-ms');
+    throw new UnauthorizedException('Token de autorización faltante');
   }
+
+  console.log(`➡️ Enviando creación de usuario a usuarios-ms con createdBy: ${request.user.userId}`);
+
+  return this.usersClient.send('create_users', {
+    createUserDto,
+    createdBy: request.user.userId, // 🔥 Se envía el usuario autenticado
+    authorization: authToken, // 🔥 Se envía el token en la petición TCP
+  }).toPromise();
+}
 
   //@UseGuards(JwtAuthGuard)
   // @Get()

@@ -35,8 +35,6 @@ export class CreateEmpresaDto {
     @IsInt()
     usua_admin_id: number; // ID del usuario administrador
 
-    @IsInt()
-    creado_por: number; // ID del superadmin que creó la empresa
 
     @IsOptional()
     @IsBoolean()

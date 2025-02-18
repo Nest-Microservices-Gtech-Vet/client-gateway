@@ -6,7 +6,7 @@ import { PassportModule } from '@nestjs/passport';
 import { JwtStrategy } from './jwt.strategy';
 import { JwtAuthGuard } from './jwt-auth.guard';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { envs, USER_SERVICE } from 'src/config';
+import { EMPRESAS_SERVICE, envs, USERS_SERVICE } from 'src/config';
 
 @Module({
   imports: [
@@ -17,7 +17,15 @@ import { envs, USER_SERVICE } from 'src/config';
     }),
     ClientsModule.register([
       {
-        name: USER_SERVICE,
+        name: USERS_SERVICE,
+        transport: Transport.TCP,
+        options: {
+          host: envs.usersMicroservicesHost,
+          port: envs.usersMicroservicesPort,
+        },
+      },
+      {
+        name: EMPRESAS_SERVICE,
         transport: Transport.TCP,
         options: {
           host: envs.usersMicroservicesHost,

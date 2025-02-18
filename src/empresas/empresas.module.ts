@@ -1,13 +1,13 @@
 import { Module } from '@nestjs/common';
 import { EmpresasController } from './empresas.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
-import { EMPRESA_SERVICE, envs } from 'src/config';
+import { EMPRESAS_SERVICE, envs } from 'src/config';
 
 @Module({
   imports: [
     ClientsModule.register([
       {
-        name: EMPRESA_SERVICE,
+        name: EMPRESAS_SERVICE,
         transport: Transport.TCP,
         options: {
           host: envs.empresasMicroservicesHost,

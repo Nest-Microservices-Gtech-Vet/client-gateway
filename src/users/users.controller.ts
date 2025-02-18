@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Pars
 import { ClientProxy, Payload, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { PaginationDto } from 'src/common';
-import { USER_SERVICE } from 'src/config';
+import { USERS_SERVICE } from 'src/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -11,7 +11,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @Controller('users')
 export class UsersController {
   constructor(
-    @Inject(USER_SERVICE) private readonly usersClient: ClientProxy,
+    @Inject(USERS_SERVICE) private readonly usersClient: ClientProxy,
   ) { }
   //---------------Empieza Crear usuario-------------
   @Post()
@@ -37,7 +37,7 @@ export class UsersController {
   @Get()
   @UseGuards(JwtAuthGuard) // ⬅️ Protege la ruta en el Gateway
   async findAll(@Query() paginationDto, @Req() request) {
-    const authToken = request.headers.authorization; // Extrae el token del header
+    const authToken = request.headers.authorization;
     console.log('➡️ Enviando solicitud a usuarios-ms:', paginationDto, 'con token:', authToken);
 
     if (!authToken) {
@@ -46,8 +46,8 @@ export class UsersController {
     }
 
     return this.usersClient.send('findAll_users', {
-      pagination: paginationDto, // 🔄 Enviar paginación correctamente
-      authorization: authToken
+      pagination: paginationDto,
+      authorization: authToken  // 🔥 Asegurar que el token se envía correctamente
     }).toPromise();
   }
   //--------------Fin obtener usuarios-------------
@@ -62,7 +62,7 @@ export class UsersController {
       throw new Error('No Authorization header');
     }
 
-    return this.usersClient.send({ cmd: 'findOne_users' }, {
+    return this.usersClient.send('findOne_users', {
       usua_id: Number(usua_id),
       authorization: authToken,
     }).toPromise();
@@ -82,16 +82,16 @@ export class UsersController {
       throw new Error('No Authorization header');
     }
 
-    
-    return this.usersClient.send({ cmd: 'delete_users' }, { 
-      usua_id: Number(usua_id), 
+
+    return this.usersClient.send('delete_users', {
+      usua_id: Number(usua_id),
       updatedBy: user.userId,
-      authorization: authToken, 
+      authorization: authToken,
     }).toPromise();
 
   }
   //---------------fin borralo logico usuarios---------------
-  
+
   //---------------Empieza actualizar un usuario-------------
   @Patch(':id')
   @UseGuards(JwtAuthGuard)

@@ -21,6 +21,14 @@ import { envs } from './config';
           port: envs.usersMicroservicesPort,
         },
       },
+      {
+        name: 'EMPRESA_SERVICE',
+        transport: Transport.TCP,
+        options: {
+          host: envs.empresasMicroservicesHost,
+          port: envs.empresasMicroservicesPort,
+        },
+      },
     ])
   ],
 

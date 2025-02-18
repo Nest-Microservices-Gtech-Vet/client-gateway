@@ -3,7 +3,7 @@ import { ClientProxy } from '@nestjs/microservices';
 
 @Controller('auth')
 export class AuthController {
-  constructor(@Inject('USER_SERVICE') private readonly client: ClientProxy) {}
+  constructor(@Inject('USERS_SERVICE') private readonly client: ClientProxy) {}
 
   @Post('login')
   async login(@Body() data: { email?: string; ruc?: string; password: string }) {

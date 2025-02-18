@@ -1,14 +1,14 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
-import { EMPRESA_SERVICE } from 'src/config';
+import { EMPRESAS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError, throwError } from 'rxjs';
 
 @Controller('empresas')
 export class EmpresasController {
   constructor(
-    @Inject(EMPRESA_SERVICE) private readonly empresasClient: ClientProxy
+    @Inject(EMPRESAS_SERVICE) private readonly empresasClient: ClientProxy
   ) {}
 
   @Post()

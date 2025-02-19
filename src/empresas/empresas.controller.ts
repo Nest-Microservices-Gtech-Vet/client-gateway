@@ -12,9 +12,12 @@ export class EmpresasController {
   ) {}
 
   @Post()
-  async create(@Body() createEmpresaDto: CreateEmpresaDto) {
+  async create(@Body() createEmpresaDto: CreateEmpresaDto, createdBy: number) {
     //console.log('Enviando mensaje a create_empresa', createEmpresaDto);
-    return this.empresasClient.send({cmd: 'create_empresa'}, createEmpresaDto);
+    return this.empresasClient.send({cmd: 'create_empresa'}, {
+      createEmpresaDto,
+      createdBy
+    });
     
   }
 

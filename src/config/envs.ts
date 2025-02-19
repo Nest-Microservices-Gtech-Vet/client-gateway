@@ -29,12 +29,14 @@ if (error) {
     throw new Error(`Config validation error: ${error.message}`);
 }
 
-export const envs = {
-    port: value.PORT,
-    
-    usersMicroservicesHost: value.USERS_MICROSERVICE_HOST,
-    usersMicroservicesPort: value.USERS_MICROSERVICE_PORT,
+const envVars: EnvVars = value;
 
-    empresasMicroservicesHost: value.EMPRESAS_MICROSERVICE_HOST,
-    empresasMicroservicesPort: value.EMPRESAS_MICROSERVICE_PORT,
+export const envs = {
+    port: envVars.PORT,
+    
+    usersMicroservicesHost: envVars.USERS_MICROSERVICE_HOST,
+    usersMicroservicesPort: envVars.USERS_MICROSERVICE_PORT,
+
+    empresasMicroservicesHost: envVars.EMPRESAS_MICROSERVICE_HOST,
+    empresasMicroservicesPort: envVars.EMPRESAS_MICROSERVICE_PORT,
 };

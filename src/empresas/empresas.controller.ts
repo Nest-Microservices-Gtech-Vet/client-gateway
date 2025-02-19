@@ -12,12 +12,13 @@ export class EmpresasController {
   ) {}
 
   @Post()
-  async create(@Body() createEmpresaDto: CreateEmpresaDto, createdBy: number) {
+  async create(@Body() createEmpresaDto: CreateEmpresaDto) {
+    const createdBy = createEmpresaDto.createdBy;
     //console.log('Enviando mensaje a create_empresa', createEmpresaDto);
-    return this.empresasClient.send({cmd: 'create_empresa'}, {
+    return await this.empresasClient.send({cmd: 'create_empresa'}, {
       createEmpresaDto,
       createdBy
-    });
+    }).toPromise();
     
   }
 

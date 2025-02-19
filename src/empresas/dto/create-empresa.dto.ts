@@ -1,4 +1,4 @@
-import { IsBoolean, IsEmail, IsInt, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
+import { IsBoolean, IsDate, IsEmail, IsInt, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
 export class CreateEmpresaDto {
     @IsString()
@@ -49,5 +49,10 @@ export class CreateEmpresaDto {
     @IsBoolean()
     activo?: boolean;
 
+    @IsOptional()
+    @IsDate()
+    fecha_registro?: Date;
+
+    
 
 }

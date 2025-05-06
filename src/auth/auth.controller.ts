@@ -11,6 +11,7 @@ export class AuthController {
 
   @Post('login-superadmin')
   loginSuperAdmin(@Body() body: { email: string, password: string }) {
+    console.log("Datos recibidos:", body);
     return this.userClient.send({ cmd: 'login-superadmin' }, body).toPromise();
   }
 

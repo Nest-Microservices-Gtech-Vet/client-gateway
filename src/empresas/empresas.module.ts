@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { EmpresasController } from './empresas.controller';
 import { ClientsModule, Transport } from '@nestjs/microservices';
 import { EMPRESAS_SERVICE, envs } from 'src/config';
+import { JwtService } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -17,6 +18,6 @@ import { EMPRESAS_SERVICE, envs } from 'src/config';
     ]),
   ],
   controllers: [EmpresasController],
-  providers: [],
+  providers: [JwtService],
 })
 export class EmpresasModule {}

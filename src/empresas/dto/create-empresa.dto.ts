@@ -36,7 +36,7 @@ export class CreateEmpresaDto {
     usua_admin_id: number; // ID del usuario administrador
 
     @IsInt()
-    createdBy: number;
+    createdBy?: number;
 
     
    

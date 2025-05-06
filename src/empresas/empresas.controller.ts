@@ -1,9 +1,10 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe, Request, UseGuards } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { EMPRESAS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError, throwError } from 'rxjs';
+import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 
 @Controller('empresas')
 export class EmpresasController {
@@ -11,15 +12,15 @@ export class EmpresasController {
     @Inject(EMPRESAS_SERVICE) private readonly empresasClient: ClientProxy
   ) { }
 
+  @UseGuards(JwtAuthGuard)
   @Post()
-  async create(@Body() createEmpresaDto: CreateEmpresaDto) {
-    const createdBy = createEmpresaDto.createdBy;
-    //console.log('Enviando mensaje a create_empresa', createEmpresaDto);
-    return await this.empresasClient.send({ cmd: 'create_empresa' }, {
-      createEmpresaDto,
-      createdBy
-    }).toPromise();
+  async create(@Request() req, @Body() createEmpresaDto: CreateEmpresaDto) {
+    console.log('Enviando mensaje a create_empresa', createEmpresaDto);
 
+    return this.empresasClient.send({ cmd: 'create_empresa' }, {
+      createEmpresaDto,
+      user: req.user, // Enviar el usuario autenticado
+    }).toPromise();
   }
 
   @Get()

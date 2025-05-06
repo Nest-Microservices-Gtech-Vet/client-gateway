@@ -1,7 +1,7 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe, Request, UseGuards } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
-import { EMPRESAS_SERVICE } from 'src/config';
+import { EMPRESAS_SERVICE, NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError, throwError } from 'rxjs';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -9,7 +9,7 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @Controller('empresas')
 export class EmpresasController {
   constructor(
-    @Inject(EMPRESAS_SERVICE) private readonly empresasClient: ClientProxy
+    @Inject(NATS_SERVICE) private readonly empresasClient: ClientProxy
   ) { }
 
   @UseGuards(JwtAuthGuard)

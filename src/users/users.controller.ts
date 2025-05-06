@@ -2,7 +2,7 @@ import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, Pars
 import { ClientProxy, Payload, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { PaginationDto } from 'src/common';
-import { USERS_SERVICE } from 'src/config';
+import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
@@ -11,20 +11,20 @@ import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
 @Controller('users')
 export class UsersController {
   constructor(
-    @Inject(USERS_SERVICE) private readonly usersClient: ClientProxy,
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
   ) { }
 
 
   @Post()
   createProduct(@Body() createUserDto: CreateUserDto,) {
-    return this.usersClient.send({ cmd: 'create_users' }, createUserDto);
+    return this.client.send({ cmd: 'create_users' }, createUserDto);
   }
 
 
   @Get()
   findUsers(@Query() paginationDto: PaginationDto,) {
     console.log('🛠 Token validado en client-gateway:',);
-    return this.usersClient.send(
+    return this.client.send(
       { cmd: 'findAll_users' },
       paginationDto).toPromise();
   }
@@ -32,7 +32,7 @@ export class UsersController {
 
   @Get(':id')
   async findOne(@Param('id') usua_id: string,) {
-    return this.usersClient.send({ cmd: 'findOne_users' }, { id: Number(usua_id) })
+    return this.client.send({ cmd: 'findOne_users' }, { id: Number(usua_id) })
       .pipe(
         catchError(err => { throw new RpcException(err) })
       );
@@ -58,12 +58,12 @@ export class UsersController {
     const payload = { ...updateUserDto, usua_id };
     console.log('🛠 Enviando datos a usuarios-ms:', payload);
 
-    return this.usersClient.send({ cmd: 'update_users' }, payload).toPromise();
+    return this.client.send({ cmd: 'update_users' }, payload).toPromise();
   }
 
   @Delete(':id')
   deleteUser(@Param('id', ParseIntPipe) usua_id: number) {
-    return this.usersClient.send({ cmd: 'delete_users' }, { usua_id })
+    return this.client.send({ cmd: 'delete_users' }, { usua_id })
       .pipe(
         catchError(err => {
           console.error('Error al eliminar usuario:', err);

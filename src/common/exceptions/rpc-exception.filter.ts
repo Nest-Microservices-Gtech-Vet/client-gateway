@@ -10,7 +10,8 @@ export class rcExceptionFilter implements ExceptionFilter {
     const rcpError = exception.getError();
 
     if (typeof rcpError === 'object' && 'status' in rcpError && 'message' in rcpError) {
-      const status = rcpError.status; // 🔹 Asegurar que status es un número
+      const status = typeof rcpError.status === 'number' ? rcpError.status : HttpStatus.INTERNAL_SERVER_ERROR;
+
       return response.status(status).json({
         status,
         message: rcpError.message
@@ -19,7 +20,7 @@ export class rcExceptionFilter implements ExceptionFilter {
 
     response.status(HttpStatus.BAD_REQUEST).json({
       status: HttpStatus.BAD_REQUEST,
-      message: rcpError
+      message: typeof rcpError === 'string' ? rcpError : 'Unexpected error'
     });
   }
 }

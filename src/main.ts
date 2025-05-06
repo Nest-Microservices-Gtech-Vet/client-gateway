@@ -3,7 +3,7 @@ import { AppModule } from './app.module';
 import { envs } from './config';
 import { Logger, ValidationPipe } from '@nestjs/common';
 import { rcExceptionFilter } from './common';
-import { ProxyMiddleware } from './proxy/proxy.middleware';
+
 
 async function bootstrap() {
 
@@ -18,8 +18,7 @@ async function bootstrap() {
   });
 
 
-  // Middleware para pasar el token en cada petición
-  app.use(new ProxyMiddleware().use);
+
 
 
 

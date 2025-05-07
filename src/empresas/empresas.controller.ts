@@ -14,13 +14,10 @@ export class EmpresasController {
 
 
   @Post()
-  async create(@Request() req, @Body() createEmpresaDto: CreateEmpresaDto) {
+  createEmp(@Body() createEmpresaDto: CreateEmpresaDto) {
     console.log('Enviando mensaje a create_empresa', createEmpresaDto);
 
-    return this.client.send({ cmd: 'create_empresa' }, {
-      createEmpresaDto,
-      user: req.user, // Enviar el usuario autenticado
-    }).toPromise();
+    return this.client.send({ cmd: 'create_empresa'}, createEmpresaDto);
   }
 
   @Get()

@@ -1,7 +1,7 @@
 import { Module } from '@nestjs/common';
 import { EmpresasController } from './empresas.controller';
 
-import { JwtService } from '@nestjs/jwt';
+
 import { NatsModule } from 'src/transports/nats.module';
 
 @Module({
@@ -9,6 +9,6 @@ import { NatsModule } from 'src/transports/nats.module';
     NatsModule
   ],
   controllers: [EmpresasController],
-  providers: [JwtService],
+  providers: [],
 })
 export class EmpresasModule {}

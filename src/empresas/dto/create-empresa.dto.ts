@@ -49,10 +49,6 @@ export class CreateEmpresaDto {
     @IsBoolean()
     activo?: boolean;
 
-    @IsOptional()
-    @IsDate()
-    fecha_registro?: Date;
-
     
 
 }

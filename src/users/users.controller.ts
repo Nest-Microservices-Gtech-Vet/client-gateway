@@ -22,7 +22,7 @@ export class UsersController {
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-  createUser(@Body() createUserDto: CreateUserDto, @User() user: CurrentUser, @Token() token:string) {
+  createUser(@Body() createUserDto: CreateUserDto, @User() user: CurrentUser, @Token() token: string) {
     const payload = {
       ...createUserDto,
       createdBy: user.id,
@@ -33,16 +33,18 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   @Get()
-  findUsers(@Query() paginationDto: PaginationDto, @User() user: CurrentUser,@Token() token:string) {
+  findUsers(@Query() paginationDto: PaginationDto, @User() user: CurrentUser, @Token() token: string) {
     console.log('🛠 Token validado en client-gateway:',);
     return this.client.send(
       { cmd: 'findAll_users' },
       paginationDto).toPromise();
   }
 
- 
+
   @Get(':id')
-  async findOne(@Param('id') usua_id: string,) {
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  async findOne(@Param('id') usua_id: string, @User() user: CurrentUser, @Token() token: string) {
     return this.client.send({ cmd: 'findOne_users' }, { id: Number(usua_id) })
       .pipe(
         catchError(err => { throw new RpcException(err) })
@@ -61,20 +63,24 @@ export class UsersController {
 
 
   @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
   patchUser(
     @Param('id', ParseIntPipe) usua_id: number,
     @Body() updateUserDto: UpdateUserDto,
-
+    @User() user: CurrentUser, @Token() token: string
   ) {
-    const payload = { ...updateUserDto, usua_id };
+    const payload = { ...updateUserDto, usua_id, updatedBy: user.id };
     console.log('🛠 Enviando datos a usuarios-ms:', payload);
 
     return this.client.send({ cmd: 'update_users' }, payload).toPromise();
   }
 
   @Delete(':id')
-  deleteUser(@Param('id', ParseIntPipe) usua_id: number) {
-    return this.client.send({ cmd: 'delete_users' }, { usua_id })
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  deleteUser(@Param('id', ParseIntPipe) usua_id: number,@User() user: CurrentUser, @Token() token: string) {
+    return this.client.send({ cmd: 'delete_users' }, { usua_id ,updatedBy: user.id })
       .pipe(
         catchError(err => {
           console.error('Error al eliminar usuario:', err);

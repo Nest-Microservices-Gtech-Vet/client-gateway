@@ -6,11 +6,17 @@ import { NatsModule } from './transports/nats.module';
 import { ProvinciasModule } from './empresas/provincias/provincias.module';
 import { CantonesModule } from './empresas/cantones/cantones.module';
 import { TiposEmpresasModule } from './empresas/tipos-empresas/tipos-empresas.module';
-
-
+import { AuthModule } from './auth/auth.module';
 
 @Module({
-  imports: [UsersModule, EmpresasModule,NatsModule, ProvinciasModule,CantonesModule,TiposEmpresasModule],
-  
+  imports: [
+    UsersModule,
+    EmpresasModule,
+    NatsModule,
+    ProvinciasModule,
+    CantonesModule,
+    TiposEmpresasModule,
+    AuthModule,
+  ],
 })
 export class AppModule {}

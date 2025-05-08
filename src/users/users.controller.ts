@@ -5,7 +5,10 @@ import { PaginationDto } from 'src/common';
 import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+import { AuthGuard } from 'src/auth/guards/auth-guard';
+import { Token, User } from 'src/auth/decorators';
+import { CurrentUser } from 'src/auth/interfaces/current-user';
+
 
 
 @Controller('users')
@@ -20,16 +23,16 @@ export class UsersController {
     return this.client.send({ cmd: 'create_users' }, createUserDto);
   }
 
-
+  @UseGuards(AuthGuard)
   @Get()
-  findUsers(@Query() paginationDto: PaginationDto,) {
+  findUsers(@Query() paginationDto: PaginationDto, @User() user: CurrentUser,@Token() token:string) {
     console.log('🛠 Token validado en client-gateway:',);
     return this.client.send(
       { cmd: 'findAll_users' },
       paginationDto).toPromise();
   }
 
-
+ 
   @Get(':id')
   async findOne(@Param('id') usua_id: string,) {
     return this.client.send({ cmd: 'findOne_users' }, { id: Number(usua_id) })

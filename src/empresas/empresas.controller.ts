@@ -4,7 +4,7 @@ import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { EMPRESAS_SERVICE, NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { catchError, throwError } from 'rxjs';
-import { JwtAuthGuard } from 'src/auth/jwt-auth.guard';
+
 
 @Controller('empresas')
 export class EmpresasController {

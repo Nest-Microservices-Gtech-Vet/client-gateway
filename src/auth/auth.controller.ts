@@ -1,23 +1,40 @@
-import { Body, Controller, Inject, Post } from '@nestjs/common';
-import { AuthService } from './auth.service';
-import { USERS_SERVICE } from 'src/config';
-import { ClientProxy } from '@nestjs/microservices';
+import { Body, Controller, Get, Inject, Post, UseGuards } from '@nestjs/common';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { catchError } from 'rxjs';
+import { NATS_SERVICE } from 'src/config';
+import { CreateUserDto } from 'src/users/dto/create-user.dto';
+import { LoginUserDto } from './dto/login-user.dto';
+import { AuthGuard } from '@nestjs/passport';
+import { Token, User } from './decorators';
+import { CurrentUser } from './interfaces/current-user';
 
 @Controller('auth')
 export class AuthController {
   constructor(
-    @Inject(USERS_SERVICE) private readonly userClient: ClientProxy,
-    private readonly authService: AuthService) { }
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
+  ) {}
 
-  @Post('login-superadmin')
-  loginSuperAdmin(@Body() body: { email: string, password: string }) {
-    console.log("Datos recibidos:", body);
-    return this.userClient.send({ cmd: 'login-superadmin' }, body).toPromise();
+  @Post('register')
+  registerUser(@Body() registerUserDto: CreateUserDto){
+    return this.client.send('auth.register.user',registerUserDto).pipe(
+      catchError((error) => {
+        throw new RpcException(error);
+      }),
+    );
   }
 
-  @Post('login-admin')
-  loginAdmin(@Body() body: { ruc: string, password: string }) {
-    return this.userClient.send({ cmd: 'login-admin' }, body).toPromise();
+  @Post('login')
+  loginUser(@Body() loginUserDto:LoginUserDto){
+    return this.client.send('auth.login.user',loginUserDto)
   }
 
+  //@UseGuards( AuthGuard)
+  @Get('verify')
+  verifyUser( @User() user: CurrentUser, @Token() token:string){
+    // const user = req['user'];
+    // const token = req['token'];
+
+    //return this.client.send('auth.verify.user',{});
+    return{user, token}
+  }
 }

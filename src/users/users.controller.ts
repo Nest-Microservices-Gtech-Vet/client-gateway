@@ -6,8 +6,9 @@ import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
-import { Token, User } from 'src/auth/decorators';
+import { Roles, Token, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
+import { RolesGuard } from 'src/auth/guards/roles-guard';
 
 
 
@@ -23,7 +24,8 @@ export class UsersController {
     return this.client.send({ cmd: 'create_users' }, createUserDto);
   }
 
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
   @Get()
   findUsers(@Query() paginationDto: PaginationDto, @User() user: CurrentUser,@Token() token:string) {
     console.log('🛠 Token validado en client-gateway:',);

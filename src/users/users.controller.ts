@@ -20,8 +20,14 @@ export class UsersController {
 
 
   @Post()
-  createProduct(@Body() createUserDto: CreateUserDto,) {
-    return this.client.send({ cmd: 'create_users' }, createUserDto);
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  createUser(@Body() createUserDto: CreateUserDto, @User() user: CurrentUser, @Token() token:string) {
+    const payload = {
+      ...createUserDto,
+      createdBy: user.id,
+    }
+    return this.client.send({ cmd: 'create_users' }, payload);
   }
 
   @UseGuards(AuthGuard, RolesGuard)

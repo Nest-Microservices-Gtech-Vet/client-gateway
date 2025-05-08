@@ -1,5 +1,5 @@
 import { Transform } from "class-transformer";
-import { IsBoolean, IsEmail, IsEnum, IsString } from "class-validator";
+import { IsBoolean, IsEmail, IsEnum, IsInt, IsOptional, IsString } from "class-validator";
 import { Rol } from "../enums/rol.enum";
 
 export class CreateUserDto {
@@ -31,4 +31,12 @@ export class CreateUserDto {
     @IsBoolean()
     @Transform(({ value }) => value === 'true' || value === true)
     activo: boolean;
+
+    @IsOptional()
+    @IsInt()
+    createdBy?: number;
+
+    @IsOptional()
+    @IsInt()
+    updatedBy?: number;
 }

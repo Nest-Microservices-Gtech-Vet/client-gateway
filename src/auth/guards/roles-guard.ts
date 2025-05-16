@@ -13,7 +13,7 @@ export class RolesGuard implements CanActivate {
       context.getClass(),
     ]);
 
-    console.log('🛡️ Required roles:', requiredRoles); // <- log 1
+    //console.log('🛡️ Required roles:', requiredRoles); // <- log 1
 
     if (!requiredRoles) {
       return true; // no roles requeridos → permite
@@ -23,7 +23,7 @@ export class RolesGuard implements CanActivate {
 
     const request = context.switchToHttp().getRequest();
     const user = request.user;
-    console.log('👤 Usuario recibido en RolesGuard:', user); // <- log 2
+    //console.log('👤 Usuario recibido en RolesGuard:', user); // <- log 2
 
     if (!user || !user.rol) {
       throw new ForbiddenException('No tiene roles asignados');
@@ -34,7 +34,7 @@ export class RolesGuard implements CanActivate {
     if (!hasRole) {
       throw new ForbiddenException('No tiene permisos suficientes');
     }
-    console.log('✅ RolesGuard pasó');
+    //console.log('✅ RolesGuard pasó');
 
     return hasRole;
   }

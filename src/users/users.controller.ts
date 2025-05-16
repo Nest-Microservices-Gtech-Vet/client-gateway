@@ -43,6 +43,19 @@ export class UsersController {
       paginationDto).toPromise();
   }
 
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  @Get('inactivos')
+  findUsersInactive(@Query() paginationDto: PaginationDto,
+    @User() user: CurrentUser,
+    @Token() token: string
+  ) {
+    console.log('🛠 Token validado en client-gateway:',);
+    return this.client.send(
+      { cmd: 'findAll_users.inactive' },
+      paginationDto).toPromise();
+  }
+
 
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)

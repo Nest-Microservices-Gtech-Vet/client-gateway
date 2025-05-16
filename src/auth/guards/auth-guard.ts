@@ -17,11 +17,11 @@ export class AuthGuard implements CanActivate {
     ) { }
 
     async canActivate(context: ExecutionContext): Promise<boolean> {
-        
+
         const request = context.switchToHttp().getRequest();
-        
+
         const token = this.extractTokenFromHeader(request);
-        console.log('📡 Enviando token a NATS:', token);
+       // console.log('📡 Enviando token a NATS:', token);
 
         if (!token) {
             throw new UnauthorizedException('Token no encontrado');
@@ -32,7 +32,8 @@ export class AuthGuard implements CanActivate {
             const { user, token: newToken } = await firstValueFrom(
                 this.client.send('auth.verify.user', token)
             );
-            console.log('🧾 Respuesta de usuarios-ms:', user); // Nuevo log
+
+            //console.log('🧾[auth-guard] Respuesta de usuarios-ms:', user); // Nuevo log
             // Normalizar el rol
             if (typeof user.usua_rol === 'string') {
                 user.rol = [user.usua_rol]; // crea un nuevo campo 'rol' como array
@@ -42,7 +43,10 @@ export class AuthGuard implements CanActivate {
                 user.rol = [];
             }
 
-            console.log('🧾 Token decodificado:', user); // <- Aquí
+            //console.log('🧾 Token decodificado:', user); // <- Aquí
+
+            // Normaliza el nombre del campo
+            user.usua_id = user.id;
 
             request['user'] = user;
             request['token'] = newToken;
@@ -50,7 +54,7 @@ export class AuthGuard implements CanActivate {
             throw new UnauthorizedException();
         }
 
-        console.log('✅ AuthGuard pasó');
+        //console.log('✅ AuthGuard pasó');
         return true;
     }
 

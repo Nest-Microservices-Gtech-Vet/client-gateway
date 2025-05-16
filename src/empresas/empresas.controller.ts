@@ -1,9 +1,9 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe, Request, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe, Request, UseGuards, InternalServerErrorException, BadRequestException, Req } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { EMPRESAS_SERVICE, NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
-import { catchError, throwError } from 'rxjs';
+import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
 import { Roles } from 'src/auth/decorators/roles.decorator';
@@ -35,14 +35,20 @@ export class EmpresasController {
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-  findAllEmpresas(user: CurrentUser, @Token() token: string) {
+  findAllEmpresas(
+    @User() user: CurrentUser,
+    @Token() token: string
+  ) {
     return this.client.send({ cmd: 'findAll_empresas' }, {});
   }
 
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('SUPERADMIN')
-  async findOne(@Param('id') emp_id: string,user: CurrentUser, @Token() token: string) {
+  @Roles('SUPERADMIN', 'ADMIN')
+  async findOne(@Param('id') emp_id: string,
+    user: CurrentUser,
+    @Token() token: string
+  ) {
     return this.client.send({ cmd: 'findOne_empresa' }, { emp_id: Number(emp_id) })
       .pipe(
         catchError(err => { throw new RpcException(err) })
@@ -79,4 +85,36 @@ export class EmpresasController {
         )
       );
   }
+
+
+  @Get('mis-empresas/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async obtenerEmpresasPorId(@Param('id') id: string) {
+    const user = { id: parseInt(id) };
+    return this.client.send('empresas.mis-empresas', { user }).toPromise();
+  }
+
+
+  
+  // @UseGuards(AuthGuard)
+  // @Get('mis-empresas')
+  // //@Roles('ADMIN')
+  // async misEmpresas(@User() user: CurrentUser) {
+  //   console.log('Usuario autenticado:', user);
+  //   return await this.client.send('empresas.mis-empresas', { user }).toPromise();
+  // }
 }
+
+
+
+
+
+
+
+
+
+
+
+
+

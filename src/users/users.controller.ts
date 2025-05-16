@@ -33,7 +33,10 @@ export class UsersController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   @Get()
-  findUsers(@Query() paginationDto: PaginationDto, @User() user: CurrentUser, @Token() token: string) {
+  findUsers(@Query() paginationDto: PaginationDto,
+    @User() user: CurrentUser,
+    @Token() token: string
+  ) {
     console.log('🛠 Token validado en client-gateway:',);
     return this.client.send(
       { cmd: 'findAll_users' },
@@ -43,20 +46,15 @@ export class UsersController {
 
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('SUPERADMIN')
-  async findOne(@Param('id') usua_id: string, @User() user: CurrentUser, @Token() token: string) {
+  @Roles('SUPERADMIN','ADMIN')
+  async findOne(@Param('id') usua_id: string,
+    @User() user: CurrentUser, 
+    @Token() token: string
+  ) {
     return this.client.send({ cmd: 'findOne_users' }, { id: Number(usua_id) })
       .pipe(
         catchError(err => { throw new RpcException(err) })
       );
-    // try{
-    //   const user = await firstValueFrom(
-    //     this.usersClient.send({ cmd: 'findOne_users'}, {usua_id:Number(usua_id)})
-    //   );
-    //   return user
-    // }catch (error) {
-    //   throw new RpcException(error)
-    // }
 
 
   }
@@ -79,8 +77,8 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-  deleteUser(@Param('id', ParseIntPipe) usua_id: number,@User() user: CurrentUser, @Token() token: string) {
-    return this.client.send({ cmd: 'delete_users' }, { usua_id ,updatedBy: user.id })
+  deleteUser(@Param('id', ParseIntPipe) usua_id: number, @User() user: CurrentUser, @Token() token: string) {
+    return this.client.send({ cmd: 'delete_users' }, { usua_id, updatedBy: user.id })
       .pipe(
         catchError(err => {
           console.error('Error al eliminar usuario:', err);

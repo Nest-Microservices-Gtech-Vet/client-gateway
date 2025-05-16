@@ -5,10 +5,13 @@ export const User = createParamDecorator(
         const request = ctx.switchToHttp().getRequest();
 
 
-        if (!request.user) {
-            throw new InternalServerErrorException('ususario no entonctrado (auth guar called?)')
+        // Acceder con notación de corchetes para mantener consistencia con AuthGuard
+        const user = request['user'];
+
+        if (!user) {
+            throw new InternalServerErrorException('Usuario no encontrado (¿AuthGuard fue llamado?)');
         }
 
-        return request.user;
+        return user;
     }
 );

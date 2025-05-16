@@ -42,6 +42,17 @@ export class EmpresasController {
     return this.client.send({ cmd: 'findAll_empresas' }, {});
   }
 
+
+  @Get('inactivas')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  findAllEmpresasInactivas(
+    @User() user: CurrentUser,
+    @Token() token: string
+  ) {
+    return this.client.send({ cmd: 'findAll_empresas.inac' }, {});
+  }
+
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN', 'ADMIN')

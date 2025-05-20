@@ -107,7 +107,7 @@ export class EmpresasController {
   }
 
 
-  
+
   // @UseGuards(AuthGuard)
   // @Get('mis-empresas')
   // //@Roles('ADMIN')
@@ -115,6 +115,7 @@ export class EmpresasController {
   //   console.log('Usuario autenticado:', user);
   //   return await this.client.send('empresas.mis-empresas', { user }).toPromise();
   // }
+
 }
 
 

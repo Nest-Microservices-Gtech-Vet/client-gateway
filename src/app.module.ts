@@ -7,6 +7,7 @@ import { ProvinciasModule } from './empresas/provincias/provincias.module';
 import { CantonesModule } from './empresas/cantones/cantones.module';
 import { TiposEmpresasModule } from './empresas/tipos-empresas/tipos-empresas.module';
 import { AuthModule } from './auth/auth.module';
+import { PropietariosModule } from './gestion-veterinaria/propietarios/propietarios.module';
 
 @Module({
   imports: [
@@ -17,6 +18,8 @@ import { AuthModule } from './auth/auth.module';
     CantonesModule,
     TiposEmpresasModule,
     AuthModule,
+    PropietariosModule,
+  
   ],
 })
 export class AppModule {}

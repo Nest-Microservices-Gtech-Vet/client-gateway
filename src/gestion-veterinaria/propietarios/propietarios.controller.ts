@@ -2,12 +2,12 @@ import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, B
 import { CreatePropietarioDto } from './dto/create-propietario.dto';
 import { UpdatePropietarioDto } from './dto/update-propietario.dto';
 import { NATS_SERVICE } from 'src/config';
-import { ClientProxy } from '@nestjs/microservices';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
 import { Roles, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
-import { firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom } from 'rxjs';
 
 @Controller('propietarios')
 export class PropietariosController {
@@ -16,6 +16,7 @@ export class PropietariosController {
   ) { }
 
 
+  //Inicia crear propietario asignado a empresa y por admin
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
@@ -41,10 +42,25 @@ export class PropietariosController {
     }
   }
 
+  //fin crear propietario asignado a empresa y por admin
+  //************************************************************************************** */
+  //inicia obtener propietarios
   @Get()
   findAll() {
-    return this.client.send({ cmd: 'findAll_propietarios' }, {})
+    return this.client.send('findAll_propietarios', {})
   }
+  //finobtener propietarios
+
+  //inicia obtener propietario por id
+  @Get(':id')
+  async findPropietarioById(
+    @Param('id') prop_id: string,
+  ) {
+    return this.client.send('findPropietarioById', {prop_id:Number(prop_id)})
+      .pipe(catchError(err => { throw new RpcException(err) }));
+  }
+  //finobtener propietariopor id
+
 
 
 }

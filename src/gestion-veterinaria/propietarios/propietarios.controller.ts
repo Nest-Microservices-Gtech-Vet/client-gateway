@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, BadRequestException, InternalServerErrorException } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, BadRequestException, InternalServerErrorException, ParseIntPipe } from '@nestjs/common';
 import { CreatePropietarioDto } from './dto/create-propietario.dto';
 import { UpdatePropietarioDto } from './dto/update-propietario.dto';
 import { NATS_SERVICE } from 'src/config';
@@ -56,11 +56,25 @@ export class PropietariosController {
   async findPropietarioById(
     @Param('id') prop_id: string,
   ) {
-    return this.client.send('findPropietarioById', {prop_id:Number(prop_id)})
+    return this.client.send('findPropietarioById', { prop_id: Number(prop_id) })
       .pipe(catchError(err => { throw new RpcException(err) }));
   }
   //finobtener propietariopor id
 
-
+  //inicia  actualizar propietario por id
+  @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  updatePropietario(
+    @Param('id', ParseIntPipe) prop_id: number,
+    @Body() updatePropietarioDto: UpdatePropietarioDto,
+    @User() user: CurrentUser
+  ) {
+    const payload = { prop_id, updatedBy: user.id, updatePropietarioDto: updatePropietarioDto}
+    return this.client.send('updatePropietario',payload).pipe(
+      catchError(err => { throw new RpcException(err) })
+    );
+  }
+  //fin actualizar propietario por id
 
 }

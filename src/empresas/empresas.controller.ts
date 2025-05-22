@@ -67,7 +67,6 @@ export class EmpresasController {
   }
 
   @Patch(':id')
-  @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   updateEmpresa(

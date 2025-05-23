@@ -7,7 +7,7 @@ import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
 import { Roles, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
-import { catchError, firstValueFrom } from 'rxjs';
+import { catchError, firstValueFrom, throwError } from 'rxjs';
 
 @Controller('propietarios')
 export class PropietariosController {
@@ -70,11 +70,29 @@ export class PropietariosController {
     @Body() updatePropietarioDto: UpdatePropietarioDto,
     @User() user: CurrentUser
   ) {
-    const payload = { prop_id, updatedBy: user.id, updatePropietarioDto: updatePropietarioDto}
-    return this.client.send('updatePropietario',payload).pipe(
+    const payload = { prop_id, updatedBy: user.id, updatePropietarioDto: updatePropietarioDto }
+    return this.client.send('updatePropietario', payload).pipe(
       catchError(err => { throw new RpcException(err) })
     );
   }
   //fin actualizar propietario por id
 
+  //inicia  eliminar propietario por id borrado logico
+  @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  removePropietario(
+    @Param('id', ParseIntPipe) prop_id: number,
+    @User() user: CurrentUser
+  ) {
+    return this.client.send('removePropietario', { prop_id, updatedBy: user.id })
+      .pipe(
+        catchError(err => {
+          console.log('Error al eliminar propietario:', err);
+          return throwError(() => new RpcException('Error al querer eliminar propietario'))
+        }
+        )
+      );
+  }
+  //fin eliminar propietario por id borrado logico
 }

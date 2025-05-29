@@ -13,7 +13,7 @@ async function bootstrap() {
   app.enableCors({
     origin: 'http://localhost:5173', // O especifica el dominio permitido
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
- 
+
     credentials: true,
   });
 
@@ -25,14 +25,16 @@ async function bootstrap() {
   app.setGlobalPrefix('api');
   app.useGlobalPipes(
     new ValidationPipe({
+      transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+
     })
   );
 
   app.useGlobalFilters(new rcExceptionFilter())
   await app.listen(envs.port)
 
-  logger.log(`Gateway running on port ${ envs.port }`);
+  logger.log(`Gateway running on port ${envs.port}`);
 }
 bootstrap();

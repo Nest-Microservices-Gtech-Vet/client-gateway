@@ -1,6 +1,6 @@
 import { Transform } from "class-transformer";
 import { IsBoolean, IsEmail, IsEnum, IsInt, IsOptional, IsString } from "class-validator";
-import { Rol } from "../enums/rol.enum";
+import { RolEnum } from "../enums/rol.enum";
 
 export class CreateUserDto {
     @IsString()
@@ -25,8 +25,8 @@ export class CreateUserDto {
     @IsString()
     usua_contrasenia:string;
 
-    @IsEnum(Rol)
-    usua_rol: Rol;
+    @IsEnum(RolEnum)
+    usua_rol: RolEnum;
 
     @IsBoolean()
     @Transform(({ value }) => value === 'true' || value === true)

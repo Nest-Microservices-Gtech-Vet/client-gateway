@@ -8,6 +8,7 @@ import { CantonesModule } from './empresas/cantones/cantones.module';
 import { TiposEmpresasModule } from './empresas/tipos-empresas/tipos-empresas.module';
 import { AuthModule } from './auth/auth.module';
 import { PropietariosModule } from './gestion-veterinaria/propietarios/propietarios.module';
+import { DebugController } from './debug/debug.controller';
 
 @Module({
   imports: [
@@ -21,5 +22,6 @@ import { PropietariosModule } from './gestion-veterinaria/propietarios/propietar
     PropietariosModule,
   
   ],
+  controllers: [DebugController],
 })
 export class AppModule {}

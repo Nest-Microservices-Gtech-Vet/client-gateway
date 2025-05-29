@@ -1,4 +1,16 @@
-import { BadRequestException, Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query, Request, UseGuards } from '@nestjs/common';
+import {
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Inject,
+  Param,
+  ParseIntPipe,
+  Patch,
+  Post,
+  Query,
+  UseGuards,
+} from '@nestjs/common';
 import { ClientProxy, Payload, RpcException } from '@nestjs/microservices';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 import { PaginationDto } from 'src/common';
@@ -9,69 +21,86 @@ import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { Roles, Token, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
-
-
+import { RolEnum } from './enums/rol.enum';
+import { GetUsuariosPorRolDto } from './dto/get-usuarios-por-rol.dto';
+import { query } from 'express';
 
 @Controller('users')
 export class UsersController {
-  constructor(
-    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
-  ) { }
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) { }
+
+
 
 
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-  createUser(@Body() createUserDto: CreateUserDto, @User() user: CurrentUser, @Token() token: string) {
+  createUser(
+    @Body() createUserDto: CreateUserDto,
+    @User() user: CurrentUser,
+    @Token() token: string,
+  ) {
     const payload = {
       ...createUserDto,
       createdBy: user.id,
-    }
+    };
     return this.client.send({ cmd: 'create_users' }, payload);
   }
+
+
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   @Get()
-  findUsers(@Query() paginationDto: PaginationDto,
+  findUsers(
+    @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
-    @Token() token: string
+    @Token() token: string,
   ) {
-    console.log('🛠 Token validado en client-gateway:',);
-    return this.client.send(
-      { cmd: 'findAll_users' },
-      paginationDto).toPromise();
+    console.log('🛠 Token validado en client-gateway:');
+    return this.client
+      .send({ cmd: 'findAll_users' }, paginationDto)
+      .toPromise();
+  }
+
+  @Get('por-rol')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  findUsuariosPorRolTest(@Query('rol') rol: string) {
+    console.log('🧪 Recibido rol plano:', rol);
+    return this.client.send({ cmd: 'findAll_users.byRole' }, { usua_rol: rol }).toPromise();
   }
 
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   @Get('inactivos')
-  findUsersInactive(@Query() paginationDto: PaginationDto,
+  findUsersInactive(
+    @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
-    @Token() token: string
+    @Token() token: string,
   ) {
-    console.log('🛠 Token validado en client-gateway:',);
-    return this.client.send(
-      { cmd: 'findAll_users.inactive' },
-      paginationDto).toPromise();
+    console.log('🛠 Token validado en client-gateway:');
+    return this.client
+      .send({ cmd: 'findAll_users.inactive' }, paginationDto)
+      .toPromise();
   }
-
 
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('SUPERADMIN','ADMIN')
-  async findOne(@Param('id') usua_id: string,
-    @User() user: CurrentUser, 
-    @Token() token: string
+  @Roles('SUPERADMIN', 'ADMIN')
+  async findOne(
+    @Param('id') usua_id: string,
+    @User() user: CurrentUser,
+    @Token() token: string,
   ) {
-    return this.client.send({ cmd: 'findOne_users' }, { id: Number(usua_id) })
+    return this.client
+      .send({ cmd: 'findOne_users' }, { id: Number(usua_id) })
       .pipe(
-        catchError(err => { throw new RpcException(err) })
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
       );
-
-
   }
-
 
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
@@ -79,7 +108,8 @@ export class UsersController {
   patchUser(
     @Param('id', ParseIntPipe) usua_id: number,
     @Body() updateUserDto: UpdateUserDto,
-    @User() user: CurrentUser, @Token() token: string
+    @User() user: CurrentUser,
+    @Token() token: string,
   ) {
     const payload = { ...updateUserDto, usua_id, updatedBy: user.id };
     console.log('🛠 Enviando datos a usuarios-ms:', payload);
@@ -90,15 +120,64 @@ export class UsersController {
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-  deleteUser(@Param('id', ParseIntPipe) usua_id: number, @User() user: CurrentUser, @Token() token: string) {
-    return this.client.send({ cmd: 'delete_users' }, { usua_id, updatedBy: user.id })
+  deleteUser(
+    @Param('id', ParseIntPipe) usua_id: number,
+    @User() user: CurrentUser,
+    @Token() token: string,
+  ) {
+    return this.client
+      .send({ cmd: 'delete_users' }, { usua_id, updatedBy: user.id })
       .pipe(
-        catchError(err => {
+        catchError((err) => {
           console.error('Error al eliminar usuario:', err);
-          return throwError(() => new RpcException('Error al eliminar el usuario'));
+          return throwError(
+            () => new RpcException('Error al eliminar el usuario'),
+          );
         }),
       );
+  }
+  //********************************************************************** */
 
+  //************************************************************************************************* */
+  // @Get('por-rol')
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles('SUPERADMIN')
+  // async findUsuariosPorRol(
+  //   @Query('rol') rol: string,
+  //   @User() user: CurrentUser,
+  //   @Token() token: string,
+  // ) {
+  //   try {
+  //     console.log('🧪 [client-gateway] Buscando usuarios por rol:', rol);
+  //     console.log('📌 Usuario autenticado:', user);
+  //     console.log('📌 Token:', token);
+
+  //     const response = await this.client
+  //       .send({ cmd: 'findAll_users.byRole' }, { usua_rol: rol })
+  //       .toPromise();
+
+  //     console.log('✅ Respuesta del microservicio:', response);
+  //     return response;
+  //   } catch (err) {
+  //     console.error('❌ Error al obtener usuarios por rol:', err);
+  //     throw new InternalServerErrorException(
+  //       err.message || 'Error desconocido',
+  //     );
+  //   }
+  // }
+
+  //********************************************************************************************** */
+
+  @Get('ping-test')
+  async pingTest() {
+    console.log('📤 [client-gateway] Enviando ping_test...');
+    const response = await this.client
+      .send({ cmd: 'ping_test' }, { prueba: '123' })
+      .toPromise();
+    console.log('✅ [client-gateway] Respuesta recibida:', response);
+    return response;
   }
 
+
+  
 }

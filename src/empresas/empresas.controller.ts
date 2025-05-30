@@ -101,7 +101,7 @@ export class EmpresasController {
 
   @Get('mis-empresas/:id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN')
+  @Roles('ADMIN','USUARIO')
   async obtenerEmpresasPorId(@Param('id') id: string) {
     const user = { id: parseInt(id) };
     return this.client.send('empresas.mis-empresas', { user }).toPromise();

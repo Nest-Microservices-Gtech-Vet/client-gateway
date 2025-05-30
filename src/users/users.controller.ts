@@ -1,29 +1,17 @@
 import {
-  Body,
-  Controller,
-  Delete,
-  Get,
-  Inject,
-  Param,
-  ParseIntPipe,
-  Patch,
-  Post,
-  Query,
-  UseGuards,
+  Body, Controller, Delete, Get, Inject, Param, ParseIntPipe, Patch, Post, Query, UseGuards,
 } from '@nestjs/common';
-import { ClientProxy, Payload, RpcException } from '@nestjs/microservices';
-import { catchError, firstValueFrom, throwError } from 'rxjs';
+import { ClientProxy, RpcException } from '@nestjs/microservices';
+import { catchError, throwError } from 'rxjs';
 import { PaginationDto } from 'src/common';
-import { NATS_SERVICE, USERS_SERVICE } from 'src/config';
+import { NATS_SERVICE } from 'src/config';
 import { CreateUserDto } from './dto/create-user.dto';
 import { UpdateUserDto } from './dto/update-user.dto';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { Roles, Token, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
-import { RolEnum } from './enums/rol.enum';
-import { GetUsuariosPorRolDto } from './dto/get-usuarios-por-rol.dto';
-import { query } from 'express';
+
 
 @Controller('users')
 export class UsersController {
@@ -66,9 +54,11 @@ export class UsersController {
   @Get('por-rol')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-  findUsuariosPorRolTest(@Query('rol') rol: string) {
-    console.log('🧪 Recibido rol plano:', rol);
-    return this.client.send({ cmd: 'findAll_users.byRole' }, { usua_rol: rol }).toPromise();
+  findUsuariosPorRolTest(@Query('rol') roles: string | string[]) {
+    //const roles = rol.split(',');
+    const rolArray = Array.isArray(roles) ? roles : [roles]
+    console.log('🧪 Recibido rol plano:', roles);
+    return this.client.send({ cmd: 'findAll_users.byRole' }, { usua_rol: roles }).toPromise();
   }
 
   @UseGuards(AuthGuard, RolesGuard)
@@ -179,5 +169,5 @@ export class UsersController {
   }
 
 
-  
+
 }

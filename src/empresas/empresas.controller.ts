@@ -10,6 +10,7 @@ import { Roles } from 'src/auth/decorators/roles.decorator';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { Token, User } from 'src/auth/decorators';
 import { CreateEmpresaUsuarioDto } from './dto/create-empresa-usuario.dto';
+import { PaginationDto } from 'src/common';
 
 
 
@@ -38,10 +39,16 @@ export class EmpresasController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   findAllEmpresas(
+    @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
     @Token() token: string
   ) {
-    return this.client.send({ cmd: 'findAll_empresas' }, {});
+    const payload = {
+      paginationDto,
+      
+
+    }
+    return this.client.send({ cmd: 'findAll_empresas' },payload);
   }
 
 
@@ -49,10 +56,16 @@ export class EmpresasController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
   findAllEmpresasInactivas(
+    @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
     @Token() token: string
   ) {
-    return this.client.send({ cmd: 'findAll_empresas.inac' }, {});
+    const payload = {
+      paginationDto,
+      
+
+    }
+    return this.client.send({ cmd: 'findAll_empresas.inac' },payload);
   }
 
   // @Get(':id')

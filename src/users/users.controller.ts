@@ -44,12 +44,12 @@ export class UsersController {
     @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
     @Token() token: string,
-  
-    
+
+
   ) {
     const payload = {
       paginationDto,
-      
+
 
     }
     console.log('🛠 Token validado en client-gateway:');
@@ -76,9 +76,15 @@ export class UsersController {
     @User() user: CurrentUser,
     @Token() token: string,
   ) {
+
+    const payload = {
+      paginationDto,
+
+
+    }
     console.log('🛠 Token validado en client-gateway:');
     return this.client
-      .send({ cmd: 'findAll_users.inactive' }, paginationDto)
+      .send({ cmd: 'findAll_users.inactive' }, payload)
       .toPromise();
   }
 

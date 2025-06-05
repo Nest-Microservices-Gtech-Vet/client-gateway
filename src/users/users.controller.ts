@@ -44,10 +44,17 @@ export class UsersController {
     @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
     @Token() token: string,
+  
+    
   ) {
+    const payload = {
+      paginationDto,
+      
+
+    }
     console.log('🛠 Token validado en client-gateway:');
     return this.client
-      .send({ cmd: 'findAll_users' }, paginationDto)
+      .send({ cmd: 'findAll_users' }, payload)
       .toPromise();
   }
 
@@ -129,32 +136,6 @@ export class UsersController {
   //********************************************************************** */
 
   //************************************************************************************************* */
-  // @Get('por-rol')
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles('SUPERADMIN')
-  // async findUsuariosPorRol(
-  //   @Query('rol') rol: string,
-  //   @User() user: CurrentUser,
-  //   @Token() token: string,
-  // ) {
-  //   try {
-  //     console.log('🧪 [client-gateway] Buscando usuarios por rol:', rol);
-  //     console.log('📌 Usuario autenticado:', user);
-  //     console.log('📌 Token:', token);
-
-  //     const response = await this.client
-  //       .send({ cmd: 'findAll_users.byRole' }, { usua_rol: rol })
-  //       .toPromise();
-
-  //     console.log('✅ Respuesta del microservicio:', response);
-  //     return response;
-  //   } catch (err) {
-  //     console.error('❌ Error al obtener usuarios por rol:', err);
-  //     throw new InternalServerErrorException(
-  //       err.message || 'Error desconocido',
-  //     );
-  //   }
-  // }
 
   //********************************************************************************************** */
 

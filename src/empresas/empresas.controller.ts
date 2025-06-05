@@ -101,7 +101,7 @@ export class EmpresasController {
 
   @Get('mis-empresas/:id')
   @UseGuards(AuthGuard, RolesGuard)
-  @Roles('ADMIN','USUARIO')
+  @Roles('ADMIN', 'USUARIO')
   async obtenerEmpresasPorId(@Param('id') id: string) {
     const user = { id: parseInt(id) };
     return this.client.send('empresas.mis-empresas', { user }).toPromise();
@@ -129,20 +129,20 @@ export class EmpresasController {
   //*********************************************************************************************************** */
   //*********************************************************************************************************** */
   @Get(':id')
-async findEmpresa(@Param('id', ParseIntPipe) id: number) {
-  const empresa = await this.client.send('empresas.findById', id).toPromise();
+  async findEmpresa(@Param('id', ParseIntPipe) id: number) {
+    const empresa = await this.client.send('empresas.findById', id).toPromise();
 
-  const usuarioIds = empresa.empresaUsuario.map((eu) => eu.usuarioId);
+    const usuarioIds = empresa.empresaUsuario.map((eu) => eu.usuarioId);
 
-  const admins = usuarioIds.length
-    ? await this.client.send('usuarios.getByIds', { ids: usuarioIds }).toPromise()
-    : [];
+    const admins = usuarioIds.length
+      ? await this.client.send('usuarios.getByIds', { ids: usuarioIds }).toPromise()
+      : [];
 
-  return {
-    ...empresa,
-    admins,
-  };
-}
+    return {
+      ...empresa,
+      admins,
+    };
+  }
 
 
 
@@ -157,6 +157,8 @@ async findEmpresa(@Param('id', ParseIntPipe) id: number) {
       { empresaId: id, usuarioIds: body.usuarioIds }
     ).toPromise();
   }
+
+  
 
 
 }

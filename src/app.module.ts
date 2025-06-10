@@ -7,8 +7,9 @@ import { ProvinciasModule } from './empresas/provincias/provincias.module';
 import { CantonesModule } from './empresas/cantones/cantones.module';
 import { TiposEmpresasModule } from './empresas/tipos-empresas/tipos-empresas.module';
 import { AuthModule } from './auth/auth.module';
-import { PropietariosModule } from './gestion-veterinaria/propietarios/propietarios.module';
+
 import { DebugController } from './debug/debug.controller';
+import { ClientesModule } from './gestion-veterinaria/clientes/clientes.module';
 
 @Module({
   imports: [
@@ -19,7 +20,7 @@ import { DebugController } from './debug/debug.controller';
     CantonesModule,
     TiposEmpresasModule,
     AuthModule,
-    PropietariosModule,
+    ClientesModule,
   
   ],
   controllers: [DebugController],

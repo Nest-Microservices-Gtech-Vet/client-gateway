@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, BadRequestException, InternalServerErrorException, ParseIntPipe } from '@nestjs/common';
-import { CreatePropietarioDto } from './dto/create-propietario.dto';
-import { UpdatePropietarioDto } from './dto/update-propietario.dto';
+import { CreateClienteDto, } from './dto/create-cliente.dto';
+import { UpdateClientesDto, } from './dto/update-cliente.dto';
 import { NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
@@ -9,8 +9,8 @@ import { Roles, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
 
-@Controller('propietarios')
-export class PropietariosController {
+@Controller('clientes')
+export class ClientesController {
   constructor(
     @Inject(NATS_SERVICE) private readonly client: ClientProxy,
   ) { }
@@ -21,24 +21,31 @@ export class PropietariosController {
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   async create(
-    @Body() createPropietarioDto: CreatePropietarioDto,
+    @Body() createClienteDto: CreateClienteDto,
     @User() user: CurrentUser,) {
     const adminId = user.id;
     try {
       return await firstValueFrom(
         this.client.send(
-          { cmd: 'crear_propietario' },
+          { cmd: 'crear_cliente' },
           {
-            createPropietarioDto: {
-              ...createPropietarioDto, // ← se respeta el empresa_id enviado
+            createClienteDto: {
+              ...createClienteDto, // ← se respeta el empresa_id enviado
             },
             user: { id: adminId },
           }
         )
       );
     } catch (error) {
-      console.error('Error al crear propietario:', error);
-      throw new InternalServerErrorException('Error al crear propietario');
+      console.error('Error al crear cliente:', {
+        message: error?.message,
+        response: error?.response,
+        cause: error?.cause,
+        stack: error?.stack,
+      });
+      throw new InternalServerErrorException(
+        error?.response?.message || 'Error al crear cliente'
+      );
     }
   }
 
@@ -67,10 +74,10 @@ export class PropietariosController {
   @Roles('ADMIN')
   updatePropietario(
     @Param('id', ParseIntPipe) prop_id: number,
-    @Body() updatePropietarioDto: UpdatePropietarioDto,
+    @Body() updateClientesDto: UpdateClientesDto,
     @User() user: CurrentUser
   ) {
-    const payload = { prop_id, updatedBy: user.id, updatePropietarioDto: updatePropietarioDto }
+    const payload = { prop_id, updatedBy: user.id, updateClientesDto: updateClientesDto }
     return this.client.send('updatePropietario', payload).pipe(
       catchError(err => { throw new RpcException(err) })
     );

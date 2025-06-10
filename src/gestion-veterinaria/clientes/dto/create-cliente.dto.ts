@@ -1,30 +1,30 @@
 import { IsBoolean, IsEmail, IsInt, IsOptional, IsString, MaxLength, MinLength } from "class-validator";
 
-export class CreatePropietarioDto {
+export class CreateClienteDto {
 
     @IsString()
     @MinLength(10)
     @MaxLength(13)
-    prop_identificacion: string;
+    cli_identificacion: string;
 
     @IsString()
-    prop_nombre: string;
+    cli_nombre: string;
 
     @IsString()
-    prop_apellido: string;
+    cli_apellido: string;
 
     @IsEmail()
-    prop_email: string;
+    cli_email: string;
 
     @IsString()
     @MaxLength(10)
-    prop_celular: string;
+    cli_celular: string;
 
     @IsString()
-    prop_direccion: string;
+    cli_direccion: string;
 
     @IsString()
-    prop_observaciones: string;
+    cli_observaciones: string;
 
     @IsInt()
     empresa_id: number; // ← para multitenencia

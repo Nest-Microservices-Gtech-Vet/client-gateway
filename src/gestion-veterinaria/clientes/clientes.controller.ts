@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, BadRequestException, InternalServerErrorException, ParseIntPipe } from '@nestjs/common';
 import { CreateClienteDto, } from './dto/create-cliente.dto';
-import { UpdateClientesDto, } from './dto/update-cliente.dto';
+import { UpdateClienteDto, } from './dto/update-cliente.dto';
 import { NATS_SERVICE } from 'src/config';
 import { ClientProxy, RpcException } from '@nestjs/microservices';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
@@ -16,7 +16,7 @@ export class ClientesController {
   ) { }
 
 
-  //Inicia crear propietario asignado a empresa y por admin
+  //Inicia crear cliente asignado a empresa y por admin
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
@@ -49,16 +49,28 @@ export class ClientesController {
     }
   }
 
-  //fin crear propietario asignado a empresa y por admin
+  //fin crear cliente asignado a empresa y por admin
   //************************************************************************************** */
-  //inicia obtener propietarios
+  //inicia obtener clientes
   @Get()
-  findAll() {
-    return this.client.send('findAll_propietarios', {})
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async findAll(
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'findAll_clientes' }, { adminId: user.id })
+      );
+    } catch (error) {
+      console.error('Error al obtener clientes:', error);
+      throw new InternalServerErrorException('No se pudo obtener la lista de clientes');
+    }
   }
-  //finobtener propietarios
+  //fin obtener clientes
+  //************************************************************************************** */
 
-  //inicia obtener propietario por id
+  //inicia obtener cliente por id
   @Get(':id')
   async findPropietarioById(
     @Param('id') prop_id: string,
@@ -66,23 +78,24 @@ export class ClientesController {
     return this.client.send('findPropietarioById', { prop_id: Number(prop_id) })
       .pipe(catchError(err => { throw new RpcException(err) }));
   }
-  //finobtener propietariopor id
+  //finobtener clientepor id
 
-  //inicia  actualizar propietario por id
+  //inicia  actualizar cliente por id
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
   updatePropietario(
-    @Param('id', ParseIntPipe) prop_id: number,
-    @Body() updateClientesDto: UpdateClientesDto,
+    @Param('id', ParseIntPipe) cli_id: number,
+    @Body() updateClienteDto: UpdateClienteDto,
     @User() user: CurrentUser
   ) {
-    const payload = { prop_id, updatedBy: user.id, updateClientesDto: updateClientesDto }
-    return this.client.send('updatePropietario', payload).pipe(
+    const payload = { cli_id, updatedBy: user.id, updateClienteDto: updateClienteDto }
+    return this.client.send('updateCliente', payload).pipe(
       catchError(err => { throw new RpcException(err) })
     );
   }
   //fin actualizar propietario por id
+  //************************************************************************************** */
 
   //inicia  eliminar propietario por id borrado logico
   @Delete(':id')
@@ -101,5 +114,6 @@ export class ClientesController {
         )
       );
   }
-  //fin eliminar propietario por id borrado logico
+  //fin eliminar cliente por id borrado logico
+  //************************************************************************************** */
 }

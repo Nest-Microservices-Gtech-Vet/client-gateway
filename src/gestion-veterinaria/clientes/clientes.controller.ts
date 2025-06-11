@@ -51,7 +51,7 @@ export class ClientesController {
 
   //fin crear cliente asignado a empresa y por admin
   //************************************************************************************** */
-  //inicia obtener clientes
+  //inicia obtener clientes por empresda  id admin
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
@@ -70,15 +70,28 @@ export class ClientesController {
   //fin obtener clientes
   //************************************************************************************** */
 
-  //inicia obtener cliente por id
-  @Get(':id')
+  //inicia obtener cliente por id y por empresa
+  @Get('por-empresa/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
   async findPropietarioById(
-    @Param('id') prop_id: string,
+    @Param('id' ,ParseIntPipe) id: number,
+     @User() user: CurrentUser,
   ) {
-    return this.client.send('findPropietarioById', { prop_id: Number(prop_id) })
-      .pipe(catchError(err => { throw new RpcException(err) }));
+    try {
+    return await firstValueFrom(
+      this.client.send({ cmd: 'clientes_por_empresa' }, {
+        empresa_id: id,
+        user: { id: user.id },
+      }),
+    );
+  } catch (error) {
+    console.error('Error al listar clientes por empresa:', error);
+    throw new InternalServerErrorException('Error al listar clientes');
+  }
   }
   //finobtener clientepor id
+  /************************************************************************************** */
 
   //inicia  actualizar cliente por id
   @Patch(':id')

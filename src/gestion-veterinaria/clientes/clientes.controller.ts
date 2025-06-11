@@ -74,21 +74,21 @@ export class ClientesController {
   @Get('por-empresa/:id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
-  async findPropietarioById(
-    @Param('id' ,ParseIntPipe) id: number,
-     @User() user: CurrentUser,
+  async findClienteById(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: CurrentUser,
   ) {
     try {
-    return await firstValueFrom(
-      this.client.send({ cmd: 'clientes_por_empresa' }, {
-        empresa_id: id,
-        user: { id: user.id },
-      }),
-    );
-  } catch (error) {
-    console.error('Error al listar clientes por empresa:', error);
-    throw new InternalServerErrorException('Error al listar clientes');
-  }
+      return await firstValueFrom(
+        this.client.send({ cmd: 'clientes_por_empresa' }, {
+          empresa_id: id,
+          user: { id: user.id },
+        }),
+      );
+    } catch (error) {
+      console.error('Error al listar clientes por empresa:', error);
+      throw new InternalServerErrorException('Error al listar clientes');
+    }
   }
   //finobtener clientepor id
   /************************************************************************************** */
@@ -97,15 +97,28 @@ export class ClientesController {
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
-  updatePropietario(
+  async updateCliente(
     @Param('id', ParseIntPipe) cli_id: number,
     @Body() updateClienteDto: UpdateClienteDto,
     @User() user: CurrentUser
   ) {
-    const payload = { cli_id, updatedBy: user.id, updateClienteDto: updateClienteDto }
-    return this.client.send('updateCliente', payload).pipe(
-      catchError(err => { throw new RpcException(err) })
-    );
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'cliente_update' }, {
+          cli_id: cli_id,
+          updateClienteDto,
+          updatedBy: user.id,
+          user: { id: user.id }
+        })
+      )
+    } catch (error) {
+      console.error('Error al actualizar cliente:', error);
+      throw new InternalServerErrorException('No se pudo actualizar el cliente');
+    }
+    // const payload = { cli_id, updatedBy: user.id, updateClienteDto: updateClienteDto }
+    // return this.client.send('updateCliente', payload).pipe(
+    //   catchError(err => { throw new RpcException(err) })
+    // );
   }
   //fin actualizar propietario por id
   //************************************************************************************** */

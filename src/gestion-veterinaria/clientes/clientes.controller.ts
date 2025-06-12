@@ -115,10 +115,6 @@ export class ClientesController {
       console.error('Error al actualizar cliente:', error);
       throw new InternalServerErrorException('No se pudo actualizar el cliente');
     }
-    // const payload = { cli_id, updatedBy: user.id, updateClienteDto: updateClienteDto }
-    // return this.client.send('updateCliente', payload).pipe(
-    //   catchError(err => { throw new RpcException(err) })
-    // );
   }
   //fin actualizar propietario por id
   //************************************************************************************** */
@@ -127,18 +123,22 @@ export class ClientesController {
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
-  removePropietario(
-    @Param('id', ParseIntPipe) prop_id: number,
+  async removeCliente(
+    @Param('id', ParseIntPipe) cli_id: number,
     @User() user: CurrentUser
   ) {
-    return this.client.send('removePropietario', { prop_id, updatedBy: user.id })
-      .pipe(
-        catchError(err => {
-          console.log('Error al eliminar propietario:', err);
-          return throwError(() => new RpcException('Error al querer eliminar propietario'))
-        }
-        )
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'cliente_delete' }, {
+          cli_id,
+          user: { id: user.id },
+          updatedBy: user.id,
+        }),
       );
+    } catch (error) {
+      console.error('Error al eliminar cliente:', error);
+      throw new InternalServerErrorException('No se pudo eliminar el cliente');
+    }
   }
   //fin eliminar cliente por id borrado logico
   //************************************************************************************** */

@@ -10,6 +10,7 @@ import { AuthModule } from './auth/auth.module';
 
 import { DebugController } from './debug/debug.controller';
 import { ClientesModule } from './gestion-veterinaria/clientes/clientes.module';
+import { MascotasModule } from './gestion-veterinaria/mascotas/mascotas.module';
 
 @Module({
   imports: [
@@ -21,6 +22,7 @@ import { ClientesModule } from './gestion-veterinaria/clientes/clientes.module';
     TiposEmpresasModule,
     AuthModule,
     ClientesModule,
+    MascotasModule,
   
   ],
   controllers: [DebugController],

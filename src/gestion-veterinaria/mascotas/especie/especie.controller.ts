@@ -1,7 +1,23 @@
-import { Controller } from '@nestjs/common';
-import { EspecieService } from './especie.service';
+import { Controller, Get, Inject, Post } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
+import { firstValueFrom } from 'rxjs';
+import { NATS_SERVICE } from 'src/config';
+
 
 @Controller('especie')
 export class EspecieController {
-  constructor(private readonly especieService: EspecieService) {}
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy,) {}
+
+  @Get()
+  async findEspecies (){
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'findAll_especie'},{})
+      )
+    } catch (error) {
+      
+    }
+  }
+
+
 }

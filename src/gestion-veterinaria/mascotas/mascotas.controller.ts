@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, InternalServerErrorException, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, InternalServerErrorException, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { CreateMascotaDto } from './dto/create-mascota.dto';
@@ -47,5 +47,24 @@ export class MascotasController {
 
   }
   //fin crear mascotas
+  //************************************************************************************************** */
+  //inicio obtener mascotas se gun empresa
+  @Get()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async findAll(
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'findAll_mascotas' }, { adminId: user.id })
+      );
+    } catch (error) {
+      console.error('Error al obtener mascotas:', error);
+      throw new InternalServerErrorException('No se pudo obtener la lista de mascotas');
+    }
+  }
+
+  //fin obtener mascotas se gun empresa
   //************************************************************************************************** */
 }

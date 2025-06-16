@@ -1,4 +1,4 @@
-import { Controller, Get, Inject, Post } from '@nestjs/common';
+import { Controller, Get, Inject, InternalServerErrorException, Post } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { firstValueFrom } from 'rxjs';
 import { NATS_SERVICE } from 'src/config';
@@ -15,7 +15,8 @@ export class EspecieController {
         this.client.send({ cmd: 'findAll_especie'},{})
       )
     } catch (error) {
-      
+      console.error('Error al obtener clientes:', error);
+            throw new InternalServerErrorException('No se pudo obtener la lista de clientes');
     }
   }
 

@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { CreateMascotaDto } from './dto/create-mascota.dto';
@@ -7,6 +7,7 @@ import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
+import { UpdateMascotaDto } from './dto/update-mascota.dto';
 
 
 @Controller('mascotas')
@@ -89,4 +90,31 @@ export class MascotasController {
   }
   //fin obtener mascotas por id se gun empresa
   //************************************************************************************************** */
+  //inicio actualizar mascota
+  @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async updateMascota(
+    @Param('id', ParseIntPipe) mas_id: number,
+    @Body() updateMascotaDto: UpdateMascotaDto,
+    @User() user: CurrentUser,
+  ){
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'mascota_update'},{
+          mas_id:mas_id,
+          updateMascotaDto,
+          updatedBy: user.id,
+          user: { id: user.id}
+        })
+      )
+    } catch (error) {
+      console.error('Error al actualizar mascota:', error);
+      throw new InternalServerErrorException('No se pudo actualizar el mascota');
+    }
+  }
+
+  //fin actualiozar mascota
+  //************************************************************************************************** */
+
 }

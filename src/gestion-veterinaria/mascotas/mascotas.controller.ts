@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { CreateMascotaDto } from './dto/create-mascota.dto';
@@ -98,14 +98,14 @@ export class MascotasController {
     @Param('id', ParseIntPipe) mas_id: number,
     @Body() updateMascotaDto: UpdateMascotaDto,
     @User() user: CurrentUser,
-  ){
+  ) {
     try {
       return await firstValueFrom(
-        this.client.send({ cmd: 'mascota_update'},{
-          mas_id:mas_id,
+        this.client.send({ cmd: 'mascota_update' }, {
+          mas_id: mas_id,
           updateMascotaDto,
           updatedBy: user.id,
-          user: { id: user.id}
+          user: { id: user.id }
         })
       )
     } catch (error) {
@@ -116,5 +116,28 @@ export class MascotasController {
 
   //fin actualiozar mascota
   //************************************************************************************************** */
+  //inicio borrado logico
+  @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async removeMacota(
+    @Param('id', ParseIntPipe) mas_id: number,
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'mascota_delete' }, {
+          mas_id,
+          user: { id: user.id },
+          updatedBy: user.id
+        })
+      );
+    } catch (error) {
+      console.error('Error al eliminar mascota:', error);
+      throw new InternalServerErrorException('No se pudo eliminar el mascota');
+    }
+  }
+  //fin borrado logico
+  //************************************************************************************************************** */
 
 }

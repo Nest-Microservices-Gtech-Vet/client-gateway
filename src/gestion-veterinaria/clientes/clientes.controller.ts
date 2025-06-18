@@ -91,8 +91,24 @@ export class ClientesController {
     }
   }
   //finobtener clientepor id
-  /************************************************************************************** */
-
+  //************************************************************************************** */
+  //inicia obtener cliente por id
+  @Get(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async finOneCliente(
+    @Param('id', ParseIntPipe) cli_id: number,
+    @User() user: CurrentUser,
+  ) {
+    return this.client.send({ cmd: 'findOne_cliente' }, { cli_id, user: { id: user.id } })
+      .pipe(
+        catchError((err) => {
+          throw new RpcException(err);
+        }),
+      );
+  }
+  //fin obtener cliente por id
+  //*************************************************************************************************** */
   //inicia  actualizar cliente por id
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)

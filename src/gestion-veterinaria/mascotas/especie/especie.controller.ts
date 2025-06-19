@@ -4,7 +4,7 @@ import { firstValueFrom } from 'rxjs';
 import { NATS_SERVICE } from 'src/config';
 
 
-@Controller('especie')
+@Controller('especies')
 export class EspecieController {
   constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy,) {}
 
@@ -15,8 +15,8 @@ export class EspecieController {
         this.client.send({ cmd: 'findAll_especie'},{})
       )
     } catch (error) {
-      console.error('Error al obtener clientes:', error);
-            throw new InternalServerErrorException('No se pudo obtener la lista de clientes');
+      console.error('Error al obtener especies:', error);
+            throw new InternalServerErrorException('No se pudo obtener la lista de especies');
     }
   }
 

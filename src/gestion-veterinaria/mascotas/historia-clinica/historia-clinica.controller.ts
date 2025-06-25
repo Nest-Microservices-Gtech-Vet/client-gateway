@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, InternalServerErrorException, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { CreateHistoriaClinicaDto } from './dto/create-historia-clinica.dto';
@@ -49,8 +49,27 @@ export class HistoriaClinicaController {
   }
   //empieza crear historia clinica
   //*************************************************************************
-  //  */
-  //
+  //empieza obtener historia clinica de la mascota */
+  @Get('mascota/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async gethisCliByIdMascota(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: CurrentUser,
+  ){
+    try {
+      return await firstValueFrom(
+        this.client.send(
+          { cmd: 'findhiscliById'},
+          {adminId: user.id,id}
+        )
+      );
+    } catch (error) {
+      console.error('Error al obtener historia clinica de mascota:', error);
+      throw new InternalServerErrorException('No se pudo obtener historia clinica de mascota');
+    }
+  }
+  //termina obtener historia clinica de la mascota
   //*************************************************************************************** */
   //  */
   //

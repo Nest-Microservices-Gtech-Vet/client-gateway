@@ -1,4 +1,4 @@
-import { Body, Controller, Inject, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
@@ -7,6 +7,7 @@ import { Roles, User } from 'src/auth/decorators';
 import { CreateConsultaDto } from './dto/create-consulta.dto';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { firstValueFrom } from 'rxjs';
+import { UpdateConsultaDto } from './dto/update-consulta.dto';
 
 @Controller('consulta')
 export class ConsultaController {
@@ -14,6 +15,7 @@ export class ConsultaController {
     @Inject(NATS_SERVICE) private readonly client: ClientProxy,
   ) { }
 
+  //inicia crear consulta
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
@@ -24,10 +26,71 @@ export class ConsultaController {
     return await firstValueFrom(
       this.client.send(
         { cmd: 'crear_consulta' },
-        { createConsultaDto:{
-          ...createConsultaDto,
-        }, user: { id: user.id } },
+        {
+          createConsultaDto: {
+            ...createConsultaDto,
+          }, user: { id: user.id }
+        },
       ),
     );
   }
+  //finaliza crear consulta
+  //******************************************** */
+  //inicia editar consulta}
+  @Get(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async findConsultaById(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'consultaById' }, {
+          id,
+          user: { id: user.id }
+        })
+      )
+    } catch (error) {
+      console.error('Error al obtener consulta con id', error);
+      throw new InternalServerErrorException('Error traer consulta ');
+    }
+  }
+  //finaliza actualizar consulta
+  //******************************************************************** */
+  //inicia editar consulta
+  @Patch('mascota/:id/modificar')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async updateConsulta(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() updateConsultaDto: UpdateConsultaDto,
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'consulta_update' }, {
+          id: id,
+          updateConsultaDto,
+          updatedBy: user.id,
+          user: { id: user.id }
+        })
+      )
+    } catch (error) {
+      console.error('Error al actualizar consulta:', error);
+      throw new InternalServerErrorException('No se pudo actualizar  consulta');
+    }
+  }
+  //finaliza actualizar consulta
+  //******************************************************************** */
 }
+
+//inicia editar consulta}
+//finaliza actualizar consulta
+//******************************************************************** */
+//inicia editar consulta}
+//finaliza actualizar consulta
+//******************************************************************** */
+//inicia editar consulta}
+//finaliza actualizar consulta
+//******************************************************************** */

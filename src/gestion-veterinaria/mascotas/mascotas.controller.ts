@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { CreateMascotaDto } from './dto/create-mascota.dto';
@@ -55,10 +55,11 @@ export class MascotasController {
   @Roles('ADMIN')
   async findAll(
     @User() user: CurrentUser,
+    @Query('empresa_id') empresaId: string,
   ) {
     try {
       return await firstValueFrom(
-        this.client.send({ cmd: 'findAll_mascotas' }, { adminId: user.id })
+        this.client.send({ cmd: 'findAll_mascotas' }, { adminId: user.id, empresaId: Number(empresaId) })
       );
     } catch (error) {
       console.error('Error al obtener mascotas:', error);

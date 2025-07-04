@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, BadRequestException, InternalServerErrorException, ParseIntPipe } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, BadRequestException, InternalServerErrorException, ParseIntPipe, Query } from '@nestjs/common';
 import { CreateClienteDto, } from './dto/create-cliente.dto';
 import { UpdateClienteDto, } from './dto/update-cliente.dto';
 import { NATS_SERVICE } from 'src/config';
@@ -57,10 +57,11 @@ export class ClientesController {
   @Roles('ADMIN')
   async findAll(
     @User() user: CurrentUser,
+    @Query('empresa_id') empresaId: string,
   ) {
     try {
       return await firstValueFrom(
-        this.client.send({ cmd: 'findAll_clientes' }, { adminId: user.id })
+        this.client.send({ cmd: 'findAll_clientes' }, { adminId: user.id,empresaId: Number(empresaId) })
       );
     } catch (error) {
       console.error('Error al obtener clientes:', error);

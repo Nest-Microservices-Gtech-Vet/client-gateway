@@ -1,4 +1,4 @@
-import { Controller, Post, UploadedFiles, UseInterceptors, Body, UseGuards, Get, Param, ParseIntPipe, InternalServerErrorException, Patch, BadRequestException } from '@nestjs/common';
+import { Controller, Post, UploadedFiles, UseInterceptors, Body, UseGuards, Get, Param, ParseIntPipe, InternalServerErrorException, Patch, BadRequestException, Query } from '@nestjs/common';
 import { AnyFilesInterceptor } from '@nestjs/platform-express';
 import * as multer from 'multer';
 import { diskStorage } from 'multer';
@@ -18,7 +18,32 @@ import { UpdateConsultaDto } from './dto/update-consulta.dto';
 export class ConsultaController {
   constructor(
     @Inject(NATS_SERVICE) private readonly client: ClientProxy,
-  ) { }
+  ) {
+    console.log('✅ ConsultaController cargado');
+  }
+
+  @Get('activa')
+  async findConsultaActiva(
+    @Query('empresa_id') empresaIdStr: string,
+    @Query('mascota_id') mascotaIdStr: string,
+  ) {
+    console.log('👉 Recibido empresa_id:', empresaIdStr, typeof empresaIdStr);
+    console.log('👉 Recibido mascota_id:', mascotaIdStr, typeof mascotaIdStr);
+
+    const empresaId = parseInt(empresaIdStr, 10);
+    const mascotaId = parseInt(mascotaIdStr, 10);
+
+    if (isNaN(empresaId) || isNaN(mascotaId)) {
+      throw new BadRequestException('Los parámetros deben ser números');
+    }
+
+    return await firstValueFrom(
+      this.client.send({ cmd: 'consulta.activa' }, {
+        empresaId,
+        mascotaId,
+      }),
+    );
+  }
 
   //inicia crear consulta
   @Post()
@@ -86,6 +111,15 @@ export class ConsultaController {
       throw new InternalServerErrorException('No se pudo actualizar  consulta');
     }
   }
+  //finaliza actualizar consulta
+  //******************************************************************** */
+  //inicia editar consulta}
+
+
+
+
+
+
   //finaliza actualizar consulta
   //******************************************************************** */
 

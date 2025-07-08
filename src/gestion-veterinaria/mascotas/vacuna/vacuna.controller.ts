@@ -6,6 +6,9 @@ import {
   UploadedFiles,
   Body,
   InternalServerErrorException,
+  Get,
+  Param,
+  ParseIntPipe,
 } from '@nestjs/common';
 import { Roles } from 'src/auth/decorators';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
@@ -40,36 +43,48 @@ export class VacunaController {
     }),
   )
   async crearVacunaConFotos(
-  @Body() body: CreateVacunaDto,
-  @UploadedFiles() files: Express.Multer.File[],
-  @User() user: CurrentUser,
-) {
-  try {
-    // ⚠️ Convertimos a número manualmente
-    const parsedDto = {
-      ...body,
-      empresa_id: parseInt(body.empresa_id),
-      mascota_id: parseInt(body.mascota_id),
-      numeroConsulta: parseInt(body.numeroConsulta),
-    };
+    @Body() body: CreateVacunaDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @User() user: CurrentUser,
+  ) {
+    try {
+      // ⚠️ Convertimos a número manualmente
+      const parsedDto = {
+        ...body,
+        empresa_id: parseInt(body.empresa_id),
+        mascota_id: parseInt(body.mascota_id),
+        numeroConsulta: parseInt(body.numeroConsulta),
+      };
 
-    // Extraemos las URLs de las fotos
-    const fotos = files.map(file => ({
-      url: `/uploads/vacunas/${file.filename}`,
-    }));
+      // Extraemos las URLs de las fotos
+      const fotos = files.map(file => ({
+        url: `/uploads/vacunas/${file.filename}`,
+      }));
 
-    const payload = {
-      createVacunaDto: parsedDto,
-      fotos: fotos,
-      user: { id: user.id },
-    };
+      const payload = {
+        createVacunaDto: parsedDto,
+        fotos: fotos,
+        user: { id: user.id },
+      };
 
-    return await firstValueFrom(
-      this.client.send({ cmd: 'vacunas.crear-con-fotos' }, payload),
-    );
-  } catch (error) {
-    console.error('Error creando vacuna con fotos:', error);
-    throw new InternalServerErrorException('Error creando vacuna con fotos');
+      return await firstValueFrom(
+        this.client.send({ cmd: 'vacunas.crear-con-fotos' }, payload),
+      );
+    } catch (error) {
+      console.error('Error creando vacuna con fotos:', error);
+      throw new InternalServerErrorException('Error creando vacuna con fotos');
+    }
   }
-}
+
+  @Get('consulta/:consultaId')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async getVacunasPorConsulta(
+    @Param('consultaId', ParseIntPipe) consultaId: number,
+    @User() user: CurrentUser,
+  ) {
+    return await firstValueFrom(
+      this.client.send({ cmd: 'vacunasPorConsulta' }, { consultaId }),
+    );
+  }
 }

@@ -1,70 +1,75 @@
-import { Body, Controller, Inject, InternalServerErrorException, Post, UseGuards } from '@nestjs/common';
-import { ClientProxy } from '@nestjs/microservices';
-import { Roles, User } from 'src/auth/decorators';
+import {
+  Controller,
+  Post,
+  UseGuards,
+  UseInterceptors,
+  UploadedFiles,
+  Body,
+  InternalServerErrorException,
+} from '@nestjs/common';
+import { Roles } from 'src/auth/decorators';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
-import { NATS_SERVICE } from 'src/config';
-import {  CreateVacunaDto } from './dto/create-vacuna.dto';
-import { CurrentUser } from 'src/auth/interfaces/current-user';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { firstValueFrom } from 'rxjs';
-
+import { Inject } from '@nestjs/common';
+import { NATS_SERVICE } from 'src/config';
+import { ClientProxy } from '@nestjs/microservices';
+import { CreateVacunaDto } from './dto/create-vacuna.dto';
+import { User } from 'src/auth/decorators';
+import { CurrentUser } from 'src/auth/interfaces/current-user';
 
 @Controller('vacuna')
 export class VacunaController {
-  constructor(
-    @Inject(NATS_SERVICE) private readonly client: ClientProxy,
-  ) { }
+  constructor(@Inject(NATS_SERVICE) private readonly client: ClientProxy) { }
 
-  //inicia crear vacunas
   @Post('registrar')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
-  async registrarVacunas(
-    @Body() createVacunaDto: CreateVacunaDto,
-    @User() user: CurrentUser,
-  ) {
-    const adminId = user.id;
-    try {
-      return await firstValueFrom(
-        this.client.send({ cmd: 'crear_vacuna' }, {
-          createVacunaDto: {
-            ...createVacunaDto
-          },
-          user: { id: adminId },
-        })
-      );
-    } catch (error) {
-      console.error('Error al registrar vacuna:', {
-        message: error?.message,
-        response: error?.response,
-        cause: error?.cause,
-        stack: error?.stack,
-      });
-      throw new InternalServerErrorException(
-        error?.response?.message || 'Error al registrar vacuna'
-      );
-    }
+  @UseInterceptors(
+    AnyFilesInterceptor({
+      storage: diskStorage({
+        destination: './uploads/vacunas',
+        filename: (req, file, cb) => {
+          const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1e9);
+          cb(null, `${file.fieldname}-${uniqueSuffix}${extname(file.originalname)}`);
+        },
+      }),
+    }),
+  )
+  async crearVacunaConFotos(
+  @Body() body: CreateVacunaDto,
+  @UploadedFiles() files: Express.Multer.File[],
+  @User() user: CurrentUser,
+) {
+  try {
+    // ⚠️ Convertimos a número manualmente
+    const parsedDto = {
+      ...body,
+      empresa_id: parseInt(body.empresa_id),
+      mascota_id: parseInt(body.mascota_id),
+      numeroConsulta: parseInt(body.numeroConsulta),
+    };
 
-  }  //fin crear vacunas
-  //************************************************ */
+    // Extraemos las URLs de las fotos
+    const fotos = files.map(file => ({
+      url: `/uploads/vacunas/${file.filename}`,
+    }));
 
+    const payload = {
+      createVacunaDto: parsedDto,
+      fotos: fotos,
+      user: { id: user.id },
+    };
 
-  //inicia crear vacunas
-  //fin crear vacunas
-  //************************************************ */
-
-
-  //inicia crear vacunas
-  //fin crear vacunas
-  //************************************************ */
-
-
-  //inicia crear vacunas
-  //fin crear vacunas
-  //************************************************ */
-
-
-  //inicia crear vacunas
-  //fin crear vacunas
-  //************************************************ */
+    return await firstValueFrom(
+      this.client.send({ cmd: 'vacunas.crear-con-fotos' }, payload),
+    );
+  } catch (error) {
+    console.error('Error creando vacuna con fotos:', error);
+    throw new InternalServerErrorException('Error creando vacuna con fotos');
+  }
+}
 }

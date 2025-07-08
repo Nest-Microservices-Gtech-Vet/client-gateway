@@ -1,12 +1,17 @@
-import { Body, Controller, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, UseGuards } from '@nestjs/common';
+import { Controller, Post, UploadedFiles, UseInterceptors, Body, UseGuards, Get, Param, ParseIntPipe, InternalServerErrorException, Patch, BadRequestException } from '@nestjs/common';
+import { AnyFilesInterceptor } from '@nestjs/platform-express';
+import * as multer from 'multer';
+import { diskStorage } from 'multer';
+import { extname } from 'path';
 import { ClientProxy } from '@nestjs/microservices';
+import { Inject } from '@nestjs/common';
 import { NATS_SERVICE } from 'src/config';
+import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
 import { Roles, User } from 'src/auth/decorators';
 import { CreateConsultaDto } from './dto/create-consulta.dto';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
-import { firstValueFrom } from 'rxjs';
 import { UpdateConsultaDto } from './dto/update-consulta.dto';
 
 @Controller('consulta')
@@ -83,6 +88,7 @@ export class ConsultaController {
   }
   //finaliza actualizar consulta
   //******************************************************************** */
+
 }
 
 //inicia editar consulta}

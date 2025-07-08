@@ -1,6 +1,4 @@
-
-
-import { IsDateString, IsInt, IsOptional, IsString } from "class-validator";
+import { IsDateString, IsOptional, IsString } from "class-validator";
 
 export class CreateVacunaDto {
     @IsString()
@@ -22,30 +20,15 @@ export class CreateVacunaDto {
 
     @IsOptional()
     @IsString()
-    vac_foto?: string;
-
-    @IsOptional()
-    @IsString()
     vac_observacion?: string;
 
-    @IsInt()
-    consulta_id: number;
+    // Los siguientes campos llegan como string desde form-data, los parseamos manualmente
+    @IsString()
+    empresa_id: string;
 
-    @IsInt()
-    empresa_id: number;
+    @IsString()
+    mascota_id: string;
 
-    @IsInt()
-    mascota_id: number;
-
-    @IsInt()
-    numeroConsulta: number;
-
-    @IsOptional()
-    @IsInt()
-    createdBy?: number;
-
-
-    @IsOptional()
-    @IsInt()
-    updatedBy?: number;
+    @IsString()
+    numeroConsulta: string;
 }

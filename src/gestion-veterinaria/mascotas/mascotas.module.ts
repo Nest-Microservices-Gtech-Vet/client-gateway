@@ -9,10 +9,10 @@ import { VacunaModule } from './vacuna/vacuna.module';
 import { ConsultaModule } from './consulta/consulta.module';
 import { HistoriaClinicaModule } from './historia-clinica/historia-clinica.module';
 import { EspecieRazaPatologiaModule } from './especie-raza-patologia/especie-raza-patologia.module';
-import { MedicamentoModule } from './medicamento/medicamento.module';
+
 import { TratamientoModule } from './tratamiento/tratamiento.module';
 import { MedicamentoModule } from './medicamento/medicamento.module';
-import { TratamientoModule } from './tratamiento/tratamiento.module';
+
 
 @Module({
   controllers: [MascotasController],

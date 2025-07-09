@@ -1,14 +1,4 @@
-import {
-  Controller,
-  Post,
-  UseGuards,
-  UseInterceptors,
-  UploadedFiles,
-  Body,
-  InternalServerErrorException,
-  Get,
-  Param,
-  ParseIntPipe,
+import {Controller,Post,UseGuards,UseInterceptors,UploadedFiles,Body,InternalServerErrorException,Get,Param,ParseIntPipe,
 } from '@nestjs/common';
 import { Roles } from 'src/auth/decorators';
 import { AuthGuard } from 'src/auth/guards/auth-guard';

@@ -1,7 +1,19 @@
 import { Type } from "class-transformer";
-import { IsArray, IsInt, IsOptional, ValidateNested } from "class-validator";
+import { IsArray, IsInt, IsOptional, IsString, ValidateNested } from "class-validator";
 import { CreateMedicamentoDto } from "../../medicamento/dto/create-medicamento.dto";
 
+
+// src/mascotas/tratamiento/dto/create-tratamiento.dto.ts
+export class MedicamentoParaTratamientoDto {
+    @IsString()
+    nombre: string;
+
+    @IsString()
+    dosis: string;
+
+    @IsInt()
+    empresa_id: number;
+}
 
 export class CreateTratamientoDto {
     @IsInt()

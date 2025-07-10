@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, UseGuards, ParseIntPipe, InternalServerErrorException } from '@nestjs/common';
 
 import { CreateTratamientoDto } from './dto/create-tratamiento.dto';
 import { UpdateTratamientoDto } from './dto/update-tratamiento.dto';
@@ -40,9 +40,50 @@ export class TratamientoController {
     return ""
   }
 
+  @Get('por-consulta/:consultaId')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async getByConsultaId(
+    @Param('consultaId', ParseIntPipe) consultaId: number,
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send(
+          { cmd: 'obtener_tratamiento_por_consulta' },
+          {
+            consultaId,
+            user: { id: user.id }
+          }
+        )
+      );
+    } catch (error) {
+      console.error('Error al obtener tratamiento por consultaId', error);
+      throw new InternalServerErrorException(`Error traer tratamiento de consulta ${consultaId}`);
+    }
+  }
+
   @Get(':id')
-  findOne(@Param('id') id: string) {
-    return" this.tratamientoService.findOne(+id);"
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async findOne(
+    @Param('id', ParseIntPipe) id: number,
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send(
+          { cmd: 'obtener_tratamiento' },
+          {
+            id,
+            user: { id: user.id }
+          }
+        )
+      )
+    } catch (error) {
+      console.error('Error al obtener tratamiento con id', error);
+      throw new InternalServerErrorException(`Error traer tratamiento${id}`);
+    }
   }
 
   @Patch(':id')

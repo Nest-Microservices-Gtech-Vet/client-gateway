@@ -20,11 +20,15 @@ async function bootstrap() {
   });
 
 
-  // 🔐 Aquí sirves los archivos subidos desde los microservicios
+  /// Para servir archivos de otras carpetas si fuera necesario
   app.useStaticAssets(join(__dirname, '..', 'uploads'), {
-    prefix: '/uploads/',
+    prefix: '/uploads',
   });
 
+  // Para servir los exámenes
+  app.useStaticAssets(join(__dirname, '..', 'uploads', 'examenes'), {
+    prefix: '/examenes',
+  });
 
 
 

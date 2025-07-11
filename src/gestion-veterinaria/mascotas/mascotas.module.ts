@@ -12,12 +12,13 @@ import { EspecieRazaPatologiaModule } from './especie-raza-patologia/especie-raz
 
 import { TratamientoModule } from './tratamiento/tratamiento.module';
 import { MedicamentoModule } from './medicamento/medicamento.module';
+import { ExamenesModule } from './examenes/examenes.module';
 
 
 @Module({
   controllers: [MascotasController],
   providers: [],
-  imports: [ NatsModule, PatologiaModule, RazaModule, EspecieModule, VacunaModule, ConsultaModule, HistoriaClinicaModule, EspecieRazaPatologiaModule, MedicamentoModule, TratamientoModule
+  imports: [ NatsModule, PatologiaModule, RazaModule, EspecieModule, VacunaModule, ConsultaModule, HistoriaClinicaModule, EspecieRazaPatologiaModule, MedicamentoModule, TratamientoModule, ExamenesModule
       ],
 })
 export class MascotasModule {}

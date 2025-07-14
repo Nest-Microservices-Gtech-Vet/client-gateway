@@ -33,8 +33,9 @@ export class VacunaController {
     }),
   )
   async crearVacunaConFotos(
-    @Body() body: CreateVacunaDto,
     @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: CreateVacunaDto,
+    
     @User() user: CurrentUser,
   ) {
     try {

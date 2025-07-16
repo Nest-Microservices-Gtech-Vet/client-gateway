@@ -36,7 +36,8 @@ export class CreateMascotaDto {
     mas_notas?: string;
 
     @IsOptional()
-    @IsBoolean()
+     @IsBoolean()
+    @Type(() => Boolean) // Aquí la clave
     activo: boolean;
 
     @IsInt()
@@ -49,6 +50,7 @@ export class CreateMascotaDto {
     raza_id: number;
 
     @IsInt()
+    @Type(() => Number) // ✅ Esto es lo importante
     empresa_id: number;
 
     @IsOptional()

@@ -13,10 +13,11 @@ import { EspecieRazaPatologiaModule } from './especie-raza-patologia/especie-raz
 import { TratamientoModule } from './tratamiento/tratamiento.module';
 import { MedicamentoModule } from './medicamento/medicamento.module';
 import { ExamenesModule } from './examenes/examenes.module';
+import { UploadsController } from './utils/uploads.controller';
 
 
 @Module({
-  controllers: [MascotasController],
+  controllers: [MascotasController,UploadsController],
   providers: [],
   imports: [ NatsModule, PatologiaModule, RazaModule, EspecieModule, VacunaModule, ConsultaModule, HistoriaClinicaModule, EspecieRazaPatologiaModule, MedicamentoModule, TratamientoModule, ExamenesModule
       ],

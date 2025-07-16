@@ -1,4 +1,4 @@
-import { Body, Controller, Delete, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Delete, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 import { CreateMascotaDto } from './dto/create-mascota.dto';
@@ -8,6 +8,25 @@ import { firstValueFrom } from 'rxjs';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
 import { RolesGuard } from 'src/auth/guards/roles-guard';
 import { UpdateMascotaDto } from './dto/update-mascota.dto';
+import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
+import { fotoUploadOptions } from './utils/foto-upload.options';
+import * as fs from 'fs';
+import * as path from 'path';
+
+
+const saveFoto = (file: Express.Multer.File) => {
+  const rutaPerfil = path.join(process.cwd(), 'uploads', 'perfil');
+
+
+  if (!fs.existsSync(rutaPerfil)) {
+    fs.mkdirSync(rutaPerfil, { recursive: true });
+  }
+
+  console.log('📂 Ruta donde se guardará la imagen:', rutaPerfil);
+
+  const filePath = path.join(rutaPerfil, file.filename);
+  fs.writeFileSync(filePath, file.buffer);
+};
 
 
 @Controller('mascotas')
@@ -20,32 +39,36 @@ export class MascotasController {
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
+  @UseInterceptors(FileInterceptor('foto', fotoUploadOptions))
   async createMascotas(
-    @Body() createMascotaDto: CreateMascotaDto,
+    @UploadedFile() foto: Express.Multer.File,
+    @Body() createMascotaDto: any,
     @User() user: CurrentUser,
   ) {
-    const adminId = user.id;
+    let fileName: string | undefined;
+
+    if (foto) {
+      fileName = foto.filename;
+    }
+
+    const payload = {
+      ...createMascotaDto,
+      mas_foto: fileName,
+    };
+
     try {
       return await firstValueFrom(
         this.client.send({ cmd: 'crear_mascota' }, {
-          createMascotaDto: {
-            ...createMascotaDto
-          },
-          user: { id: adminId },
-        })
+          createMascotaDto: payload,
+          user: { id: user.id },
+        }),
       );
     } catch (error) {
-      console.error('Error al crear mascota:', {
-        message: error?.message,
-        response: error?.response,
-        cause: error?.cause,
-        stack: error?.stack,
-      });
+      console.error('Error al crear mascota:', error);
       throw new InternalServerErrorException(
-        error?.response?.message || 'Error al crear mascota'
+        error?.response?.message || 'Error al crear mascota',
       );
     }
-
   }
   //fin crear mascotas
   //************************************************************************************************** */
@@ -95,25 +118,64 @@ export class MascotasController {
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('ADMIN')
+  @UseInterceptors(AnyFilesInterceptor())
   async updateMascota(
     @Param('id', ParseIntPipe) mas_id: number,
-    @Body() updateMascotaDto: UpdateMascotaDto,
+    @UploadedFiles() files: Express.Multer.File[],
+    @Body() body: any,
     @User() user: CurrentUser,
   ) {
     try {
+      console.log('Archivos recibidos:', files); // ✅ ¿Se imprime algo?
+      console.log('Body keys:', Object.keys(body));
+      const foto = files?.find((file) => file.fieldname === 'mas_foto');
+
+      console.log('body instanceof FormData?', body instanceof FormData);
+      console.log('body keys:', Object.keys(body));
+
+      const updateMascotaDto: any = {
+        mas_nombre: body.mas_nombre,
+        mas_fechaNac: body.mas_fechaNac,
+        mas_peso: parseFloat(body.mas_peso),
+        mas_color: body.mas_color,
+        mas_esterilizado: body.mas_esterilizado === 'true',
+        mas_microchip: body.mas_microchip,
+        mas_notas: body.mas_notas,
+        activo: body.activo === 'true',
+        empresa_id: parseInt(body.empresa_id),
+        especie: { connect: { esp_id: parseInt(body.especie_id) } },
+        raza: { connect: { raz_id: parseInt(body.raza_id) } },
+        propietario: { connect: { cli_id: parseInt(body.cliente_id) } },
+      };
+
+      if (foto && foto.buffer) {
+        const ext = path.extname(foto.originalname);
+        const nombreUnico = `${Date.now()}-${Math.round(Math.random() * 1e6)}${ext}`;
+        foto.filename = nombreUnico;
+
+        // Usar la función helper
+        saveFoto(foto);
+
+        updateMascotaDto.mas_foto = nombreUnico;
+      }
+
+
       return await firstValueFrom(
         this.client.send({ cmd: 'mascota_update' }, {
-          mas_id: mas_id,
+          mas_id,
           updateMascotaDto,
           updatedBy: user.id,
-          user: { id: user.id }
+          user: { id: user.id },
+          files,
         })
-      )
+      );
     } catch (error) {
-      console.error('Error al actualizar mascota:', error);
-      throw new InternalServerErrorException('No se pudo actualizar el mascota');
+      console.error('❌ Error al actualizar mascota:', error);
+      throw new InternalServerErrorException('No se pudo actualizar la mascota');
     }
   }
+
+
 
   //fin actualiozar mascota
   //************************************************************************************************** */

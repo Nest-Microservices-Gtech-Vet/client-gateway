@@ -25,10 +25,16 @@ async function bootstrap() {
     prefix: '/uploads',
   });
 
-  // Para servir los exámenes
-  app.useStaticAssets(join(__dirname, '..', 'uploads', 'examenes'), {
-    prefix: '/examenes',
-  });
+  // // Para servir los exámenes
+  // app.useStaticAssets(join(__dirname, '..', 'uploads', 'examenes'), {
+  //   prefix: '/examenes',
+  // });
+
+  //  // Para servir las fotos de las mascotas
+  // app.useStaticAssets(join(__dirname, '..', 'uploads', 'perfil'), {
+  //   prefix: '/perfil',
+  // });
+
 
 
 

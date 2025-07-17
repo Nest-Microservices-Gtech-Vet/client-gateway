@@ -22,7 +22,6 @@ export class CreateVacunaDto {
     @IsString()
     vac_observacion?: string;
 
-    // Los siguientes campos llegan como string desde form-data, los parseamos manualmente
     @IsString()
     empresa_id: string;
 
@@ -30,5 +29,10 @@ export class CreateVacunaDto {
     mascota_id: string;
 
     @IsString()
-    numeroConsulta: string;
+    historiaClinica_id: string; // ✅ requerido ahora
+
+    // Eliminar este campo si ya no lo usas:
+    // @IsOptional()
+    // @IsString()
+    // numeroConsulta?: string;
 }

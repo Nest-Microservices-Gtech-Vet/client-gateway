@@ -44,7 +44,7 @@ export class VacunaController {
         ...body,
         empresa_id: parseInt(body.empresa_id),
         mascota_id: parseInt(body.mascota_id),
-        numeroConsulta: parseInt(body.numeroConsulta),
+        //numeroConsulta: parseInt(body.numeroConsulta),
       };
 
       // Extraemos las URLs de las fotos

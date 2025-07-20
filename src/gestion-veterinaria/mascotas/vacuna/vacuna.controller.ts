@@ -1,4 +1,5 @@
-import {Controller,Post,UseGuards,UseInterceptors,UploadedFiles,Body,InternalServerErrorException,Get,Param,ParseIntPipe,
+import {
+  Controller, Post, UseGuards, UseInterceptors, UploadedFiles, Body, InternalServerErrorException, Get, Param, ParseIntPipe,
 } from '@nestjs/common';
 import { Roles } from 'src/auth/decorators';
 import { AuthGuard } from 'src/auth/guards/auth-guard';
@@ -35,7 +36,7 @@ export class VacunaController {
   async crearVacunaConFotos(
     @UploadedFiles() files: Express.Multer.File[],
     @Body() body: CreateVacunaDto,
-    
+
     @User() user: CurrentUser,
   ) {
     try {
@@ -76,6 +77,18 @@ export class VacunaController {
   ) {
     return await firstValueFrom(
       this.client.send({ cmd: 'vacunasPorConsulta' }, { consultaId }),
+    );
+  }
+
+  @Get('mascota/:mascotaId')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async getVacunasPorMascota(
+    @Param('mascotaId', ParseIntPipe) mascotaId: number,
+    @User() user: CurrentUser,
+  ) {
+    return await firstValueFrom(
+      this.client.send({ cmd: 'vacunasPorMascota' }, { mascotaId }),
     );
   }
 }

@@ -29,7 +29,7 @@ export class CreateVacunaDto {
     mascota_id: string;
 
     @IsString()
-    historiaClinica_id: string; // ✅ requerido ahora
+    historiaClinica_id?: string; // ✅ requerido ahora
 
     // Eliminar este campo si ya no lo usas:
     // @IsOptional()

@@ -1,5 +1,6 @@
 import { Type } from "class-transformer";
-import { IsBoolean, IsDate, IsInt, IsNumber, IsOptional, IsString } from "class-validator";
+import { IsBoolean, IsDate, IsInt, IsNumber, IsOptional, IsPositive, IsString } from "class-validator";
+import { PaginationDto } from "src/common";
 
 export class CreateMascotaDto {
     @IsString()
@@ -62,3 +63,11 @@ export class CreateMascotaDto {
     @IsInt()
     updatedBy?: number;
 }
+
+
+export class MascotaBusquedaDto extends PaginationDto {
+  @IsPositive()
+  @Type(() => Number)
+  empresa_id: number;
+}
+

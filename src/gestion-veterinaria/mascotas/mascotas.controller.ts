@@ -1,7 +1,7 @@
 import { Body, Controller, Delete, Get, Inject, InternalServerErrorException, Param, ParseIntPipe, Patch, Post, Query, UploadedFile, UploadedFiles, UseGuards, UseInterceptors } from '@nestjs/common';
 import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
-import { CreateMascotaDto } from './dto/create-mascota.dto';
+import { CreateMascotaDto, MascotaBusquedaDto } from './dto/create-mascota.dto';
 import { Roles, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { firstValueFrom } from 'rxjs';
@@ -12,6 +12,7 @@ import { AnyFilesInterceptor, FileInterceptor } from '@nestjs/platform-express';
 import { fotoUploadOptions } from './utils/foto-upload.options';
 import * as fs from 'fs';
 import * as path from 'path';
+import { PaginationDto } from 'src/common';
 
 
 const saveFoto = (file: Express.Multer.File) => {
@@ -78,11 +79,19 @@ export class MascotasController {
   @Roles('ADMIN')
   async findAll(
     @User() user: CurrentUser,
-    @Query('empresa_id') empresaId: string,
+    //@Query('empresa_id') empresaId: string,
+    @Query() query: MascotaBusquedaDto,
   ) {
+    const { empresa_id, ...paginationDto } = query;
     try {
       return await firstValueFrom(
-        this.client.send({ cmd: 'findAll_mascotas' }, { adminId: user.id, empresaId: Number(empresaId) })
+        this.client.send(
+          { cmd: 'findAll_mascotas' },
+          {
+            adminId: user.id,
+            empresaId: empresa_id,
+            paginationDto
+          })
       );
     } catch (error) {
       console.error('Error al obtener mascotas:', error);

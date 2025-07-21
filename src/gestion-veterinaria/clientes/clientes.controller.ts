@@ -8,6 +8,7 @@ import { RolesGuard } from 'src/auth/guards/roles-guard';
 import { Roles, User } from 'src/auth/decorators';
 import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { catchError, firstValueFrom, throwError } from 'rxjs';
+import { MascotaBusquedaDto } from '../mascotas/dto/create-mascota.dto';
 
 @Controller('clientes')
 export class ClientesController {
@@ -58,10 +59,18 @@ export class ClientesController {
   async findAll(
     @User() user: CurrentUser,
     @Query('empresa_id') empresaId: string,
+    @Query() query: MascotaBusquedaDto,
   ) {
+    const { empresa_id, ...paginationDto } = query;
     try {
       return await firstValueFrom(
-        this.client.send({ cmd: 'findAll_clientes' }, { adminId: user.id,empresaId: Number(empresaId) })
+        this.client.send(
+          { cmd: 'findAll_clientes' }, 
+          { 
+            adminId: user.id, 
+            empresaId: Number(empresaId),
+            paginationDto,
+           })
       );
     } catch (error) {
       console.error('Error al obtener clientes:', error);
@@ -78,12 +87,15 @@ export class ClientesController {
   async findClienteById(
     @Param('id', ParseIntPipe) id: number,
     @User() user: CurrentUser,
+     @Query() query: MascotaBusquedaDto,
   ) {
+    const { empresa_id, ...paginationDto } = query;
     try {
       return await firstValueFrom(
         this.client.send({ cmd: 'clientes_por_empresa' }, {
           empresa_id: id,
           user: { id: user.id },
+          paginationDto
         }),
       );
     } catch (error) {

@@ -20,8 +20,7 @@ export class CreateConsultaDto {
 
     @IsOptional()
     @IsNumber()
-    @Min(35)
-    @Max(42)
+    @Min(0)
     con_temperaturaCorporal?: number;
 
     @IsOptional()

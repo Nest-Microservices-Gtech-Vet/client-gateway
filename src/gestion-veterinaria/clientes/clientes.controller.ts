@@ -65,12 +65,12 @@ export class ClientesController {
     try {
       return await firstValueFrom(
         this.client.send(
-          { cmd: 'findAll_clientes' }, 
-          { 
-            adminId: user.id, 
+          { cmd: 'findAll_clientes' },
+          {
+            adminId: user.id,
             empresaId: Number(empresaId),
             paginationDto,
-           })
+          })
       );
     } catch (error) {
       console.error('Error al obtener clientes:', error);
@@ -87,7 +87,7 @@ export class ClientesController {
   async findClienteById(
     @Param('id', ParseIntPipe) id: number,
     @User() user: CurrentUser,
-     @Query() query: MascotaBusquedaDto,
+    @Query() query: MascotaBusquedaDto,
   ) {
     const { empresa_id, ...paginationDto } = query;
     try {
@@ -105,6 +105,28 @@ export class ClientesController {
   }
   //finobtener clientepor id
   //************************************************************************************** */
+  // 👇 se coloca ANTES del @Get(':id')
+  @Get('validar-identificacion/:identificacion')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async validarIdentificacion(
+    @Param('identificacion') identificacion: string,
+    @User() user: CurrentUser,
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send(
+          { cmd: 'validar_identificacion_cliente' },
+          { identificacion, user: { id: user.id } }
+        )
+      );
+    } catch (error) {
+      console.error('Error al validar identificación del cliente:', error);
+      throw new InternalServerErrorException('Error al validar identificación');
+    }
+  }
+
+  //**************************************************************************************** */
   //inicia obtener cliente por id
   @Get(':id')
   @UseGuards(AuthGuard, RolesGuard)

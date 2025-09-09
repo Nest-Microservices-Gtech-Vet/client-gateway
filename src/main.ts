@@ -47,6 +47,9 @@ async function bootstrap() {
       transform: true,
       whitelist: true,
       forbidNonWhitelisted: true,
+      transformOptions: {
+      enableImplicitConversion: true, // 🔹 convierte strings a number/boolean si el DTO lo espera
+    },
 
     })
   );

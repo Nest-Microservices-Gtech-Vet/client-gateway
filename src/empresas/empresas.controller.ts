@@ -1,4 +1,4 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe, Request, UseGuards, InternalServerErrorException, BadRequestException, Req } from '@nestjs/common';
+import { Controller, Get, Post, Body, Patch, Param, Delete, Inject, Query, ParseIntPipe, Request, UseGuards, InternalServerErrorException, BadRequestException, Req, UseInterceptors, UploadedFile } from '@nestjs/common';
 import { CreateEmpresaDto } from './dto/create-empresa.dto';
 import { UpdateEmpresaDto } from './dto/update-empresa.dto';
 import { EMPRESAS_SERVICE, NATS_SERVICE } from 'src/config';
@@ -11,8 +11,24 @@ import { CurrentUser } from 'src/auth/interfaces/current-user';
 import { Token, User } from 'src/auth/decorators';
 import { CreateEmpresaUsuarioDto } from './dto/create-empresa-usuario.dto';
 import { PaginationDto } from 'src/common';
+import * as fs from 'fs';
+import * as path from 'path';
+import { FileInterceptor } from '@nestjs/platform-express';
+import { fotoLogoUploadOptions } from 'src/gestion-veterinaria/mascotas/utils/foto-upload.options';
+
+const saveFoto = (file: Express.Multer.File) => {
+  const rutaLogo = path.join(process.cwd(), 'uploads', 'logos');
 
 
+  if (!fs.existsSync(rutaLogo)) {
+    fs.mkdirSync(rutaLogo, { recursive: true });
+  }
+
+  console.log('📂 Ruta donde se guardará la imagen:', rutaLogo);
+
+  const filePath = path.join(rutaLogo, file.filename);
+  fs.writeFileSync(filePath, file.buffer);
+};
 
 @Controller('empresas')
 export class EmpresasController {
@@ -24,13 +40,23 @@ export class EmpresasController {
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-  createEmp(@Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
+  @UseInterceptors(FileInterceptor('foto', fotoLogoUploadOptions))
+  createEmp(@UploadedFile() foto: Express.Multer.File, @Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
     console.log('Enviando mensaje a create_empresa', createEmpresaDto);
 
-    const payload = {
-      ...createEmpresaDto,
-      createdBy: user.id
+    let fileName: string | undefined;
+
+    if (foto) {
+      fileName = foto.filename;
     }
+
+    const payload = {
+      createEmpresaDto: {
+        ...createEmpresaDto,
+        emp_foto: fileName,
+      },
+      user,
+    };
 
     return this.client.send({ cmd: 'create_empresa' }, payload);
   }
@@ -45,10 +71,10 @@ export class EmpresasController {
   ) {
     const payload = {
       paginationDto,
-      
+
 
     }
-    return this.client.send({ cmd: 'findAll_empresas' },payload);
+    return this.client.send({ cmd: 'findAll_empresas' }, payload);
   }
 
 
@@ -62,10 +88,10 @@ export class EmpresasController {
   ) {
     const payload = {
       paginationDto,
-      
+
 
     }
-    return this.client.send({ cmd: 'findAll_empresas.inac' },payload);
+    return this.client.send({ cmd: 'findAll_empresas.inac' }, payload);
   }
 
   // @Get(':id')
@@ -171,7 +197,7 @@ export class EmpresasController {
     ).toPromise();
   }
 
-  
+
 
 
 }

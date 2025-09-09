@@ -20,6 +20,10 @@ export class CreateEmpresaDto {
     @MinLength(10)
     @MaxLength(13)
     emp_ruc: string;
+    
+    @IsOptional()
+    @IsString()
+    emp_foto?: string;
 
     @IsString()
     emp_tipo_empresa: string;

@@ -57,9 +57,32 @@ export class MedicamentoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateMedicamentoDto: UpdateMedicamentoDto) {
-    return 'this.medicamentoService.update(+id, updateMedicamentoDto)';
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async updateMedicamento(
+    @Param('id') id: number,
+    @Body() updateMedicamentoDto: UpdateMedicamentoDto,
+    @User() user: CurrentUser
+
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'medi_update' },
+          {
+            med_id: id,
+            updateMedicamentoDto,
+            updatedBy: user.id,
+            user: { id: user.id }
+
+          }
+        )
+      )
+    } catch (error) {
+      console.error('Error al actualizar medicamento:', error);
+      throw new InternalServerErrorException('No se pudo actualizar el medicamento');
+    }
   }
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {

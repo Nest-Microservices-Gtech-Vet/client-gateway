@@ -87,9 +87,28 @@ export class TratamientoController {
   }
 
   @Patch(':id')
-  update(@Param('id') id: string, @Body() updateTratamientoDto: UpdateTratamientoDto) {
-    return "this.tratamientoService.update(+id, updateTratamientoDto);"
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN')
+  async updateTratamiento(
+    @Param('id') id: number,
+    @Body() updateTratamientoDto: UpdateTratamientoDto,
+    @User() user: CurrentUser
+  ) {
+    try {
+      return await firstValueFrom(
+        this.client.send({ cmd: 'update_tratamiento' }, {
+          tra_id: id,
+          updateTratamientoDto,
+          updatedBy: user.id,
+          user: { id: user.id }
+        })
+      );
+    } catch (error) {
+      console.error('Error al actualizar tratamiento:', error);
+      throw new InternalServerErrorException('No se pudo actualizar el tratamiento');
+    }
   }
+
 
   @Delete(':id')
   remove(@Param('id') id: string) {

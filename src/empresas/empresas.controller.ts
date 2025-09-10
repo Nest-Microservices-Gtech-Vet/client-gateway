@@ -110,16 +110,31 @@ export class EmpresasController {
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
+  @UseInterceptors(FileInterceptor('foto', fotoLogoUploadOptions))
   updateEmpresa(
     @Param('id', ParseIntPipe) emp_id: number,
+    @UploadedFile() foto: Express.Multer.File,
     @Body() updateEmpresaDto: UpdateEmpresaDto,
     @User() user: CurrentUser, @Token() token: string) {
-    const payload = { emp_id, updatedBy: user.id, updateEmpresaDto: updateEmpresaDto, }
-    return this.client.send(
-      { cmd: 'update_empresa' },
-      payload
-    ).pipe(
-      catchError(err => { throw new RpcException(err) })
+    let fileName: string | undefined = updateEmpresaDto.emp_foto;
+
+    if (foto) {
+      fileName = foto.filename; // ✅ si viene nueva foto, reemplaza
+    }
+
+    const payload = {
+      emp_id,
+      updatedBy: user.id,
+      updateEmpresaDto: {
+        ...updateEmpresaDto,
+        emp_foto: fileName,
+      },
+    };
+
+    return this.client.send({ cmd: 'update_empresa' }, payload).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
     );
   }
 

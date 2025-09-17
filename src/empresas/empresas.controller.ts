@@ -137,7 +137,7 @@ export class EmpresasController {
       }),
     );
   }
-
+//aqui empieza borrar
   @Delete(':id')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')

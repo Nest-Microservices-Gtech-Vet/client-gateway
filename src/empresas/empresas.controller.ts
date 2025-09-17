@@ -20,6 +20,7 @@ const saveFoto = (file: Express.Multer.File) => {
   const rutaLogo = path.join(process.cwd(), 'uploads', 'logos');
 
 
+<<<<<<< Updated upstream
   if (!fs.existsSync(rutaLogo)) {
     fs.mkdirSync(rutaLogo, { recursive: true });
   }
@@ -30,16 +31,18 @@ const saveFoto = (file: Express.Multer.File) => {
   fs.writeFileSync(filePath, file.buffer);
 };
 
+=======
+>>>>>>> Stashed changes
 @Controller('empresas')
 export class EmpresasController {
   constructor(
     @Inject(NATS_SERVICE) private readonly client: ClientProxy
   ) { }
 
-
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
+<<<<<<< Updated upstream
   @UseInterceptors(FileInterceptor('foto', fotoLogoUploadOptions))
   createEmp(@UploadedFile() foto: Express.Multer.File, @Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
     console.log('Enviando mensaje a create_empresa', createEmpresaDto);
@@ -58,12 +61,17 @@ export class EmpresasController {
       user,
     };
 
+=======
+  createEmp(@Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
+    const payload = { ...createEmpresaDto, createdBy: user.id };
+>>>>>>> Stashed changes
     return this.client.send({ cmd: 'create_empresa' }, payload);
   }
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
+<<<<<<< Updated upstream
   findAllEmpresas(
     @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
@@ -75,12 +83,16 @@ export class EmpresasController {
 
     }
     return this.client.send({ cmd: 'findAll_empresas' }, payload);
+=======
+  findAllEmpresas(@Query() paginationDto: PaginationDto) {
+    return this.client.send({ cmd: 'findAll_empresas' }, { paginationDto });
+>>>>>>> Stashed changes
   }
-
 
   @Get('inactivas')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
+<<<<<<< Updated upstream
   findAllEmpresasInactivas(
     @Query() paginationDto: PaginationDto,
     @User() user: CurrentUser,
@@ -136,22 +148,17 @@ export class EmpresasController {
         throw new RpcException(err);
       }),
     );
+=======
+  findAllEmpresasInactivas(@Query() paginationDto: PaginationDto) {
+    return this.client.send({ cmd: 'findAll_empresas.inac' }, { paginationDto });
   }
 
-  @Delete(':id')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('SUPERADMIN')
-  removeEmpresa(@Param('id', ParseIntPipe) emp_id: number, @User() user: CurrentUser, @Token() token: string) {
-    return this.client.send({ cmd: 'delete_empresa' }, { emp_id, updatedBy: user.id })
-      .pipe(
-        catchError(err => {
-          console.log('Error al eliminar la empresa:', err);
-          return throwError(() => new RpcException('Error al querer eliminar la empresa'))
-        }
-        )
-      );
+  @Post('asignar-usuarios')
+  async asignarUsuarios(@Body() dto: CreateEmpresaUsuarioDto) {
+    return this.client.send({ cmd: 'asignar-usuarios-empresa' }, dto)
+      .pipe(catchError(err => { throw new RpcException(err) }));
+>>>>>>> Stashed changes
   }
-
 
   @Get('mis-empresas/:id')
   @UseGuards(AuthGuard, RolesGuard)
@@ -161,62 +168,47 @@ export class EmpresasController {
     return this.client.send('empresas.mis-empresas', { user }).toPromise();
   }
 
-
-
-  // @UseGuards(AuthGuard)
-  // @Get('mis-empresas')
-  // //@Roles('ADMIN')
-  // async misEmpresas(@User() user: CurrentUser) {
-  //   console.log('Usuario autenticado:', user);
-  //   return await this.client.send('empresas.mis-empresas', { user }).toPromise();
-  // }
-
-  //************************************************************************************************** */
-  @Post('asignar-usuarios')
-  async asignarUsuarios(
-    @Body() dto: CreateEmpresaUsuarioDto,
-  ) {
-    return this.client.send({ cmd: 'asignar-usuarios-empresa' }, dto).pipe(
-      catchError(err => { throw new RpcException(err) })
-    );
-  }
-  //*********************************************************************************************************** */
-  //*********************************************************************************************************** */
-  @Get(':id')
-  async findEmpresa(@Param('id', ParseIntPipe) id: number) {
-    const empresa = await this.client.send('empresas.findById', id).toPromise();
-
-    const usuarioIds = empresa.empresaUsuario.map((eu) => eu.usuarioId);
-
-    const admins = usuarioIds.length
-      ? await this.client.send('usuarios.getByIds', { ids: usuarioIds }).toPromise()
-      : [];
-
-    return {
-      ...empresa,
-      admins,
-    };
-  }
-
-
-
-  //*********************************************************************************************************** */
   @Post(':id/asignar-usuarios')
-  async asignarUsuariosEmpresa(
-    @Param('id', ParseIntPipe) id: number,
-    @Body() body: { usuarioIds: number[] },
-  ) {
+  async asignarUsuariosEmpresa(@Param('id', ParseIntPipe) id: number, @Body() body: { usuarioIds: number[] }) {
     return this.client.send(
       { cmd: 'asignar-usuarios-empresa' },
       { empresaId: id, usuarioIds: body.usuarioIds }
     ).toPromise();
   }
 
+<<<<<<< Updated upstream
 
+=======
+  @Get(':id')
+  async findEmpresa(@Param('id', ParseIntPipe) id: number) {
+    const empresa = await this.client.send('empresas.findById', id).toPromise();
+    const usuarioIds = empresa.empresaUsuario.map((eu) => eu.usuarioId);
+    const admins = usuarioIds.length
+      ? await this.client.send('usuarios.getByIds', { ids: usuarioIds }).toPromise()
+      : [];
+    return { ...empresa, admins };
+  }
+>>>>>>> Stashed changes
 
+  @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  updateEmpresa(@Param('id', ParseIntPipe) emp_id: number, @Body() updateEmpresaDto: UpdateEmpresaDto, @User() user: CurrentUser) {
+    return this.client.send({ cmd: 'update_empresa' }, { emp_id, updatedBy: user.id, updateEmpresaDto })
+      .pipe(catchError(err => { throw new RpcException(err) }));
+  }
+
+  @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  removeEmpresa(@Param('id', ParseIntPipe) emp_id: number, @User() user: CurrentUser) {
+    return this.client.send({ cmd: 'delete_empresa' }, { emp_id, updatedBy: user.id })
+      .pipe(catchError(err => throwError(() => new RpcException('Error al querer eliminar la empresa'))));
+  }
+
+  // 👇 ESTA VA AL FINAL
 
 }
-
 
 
 

@@ -12,12 +12,17 @@ async function bootstrap() {
   const logger = new Logger(`Main-gateway`);
 
   const app = await NestFactory.create<NestExpressApplication>(AppModule);
-  app.enableCors({
-    origin: 'http://localhost:5173', // O especifica el dominio permitido
-    methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+ 
 
-    credentials: true,
-  });
+  app.enableCors({
+  origin: [
+    'http://localhost:5173',
+    'https://app.amigovet123.com',
+  ],
+  methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
+  credentials: true,
+});
+
 
 
   /// Para servir archivos de otras carpetas si fuera necesario
@@ -55,7 +60,7 @@ async function bootstrap() {
   );
 
   app.useGlobalFilters(new rcExceptionFilter())
-  await app.listen(envs.port)
+  await app.listen(envs.port, '0.0.0.0')
 
   logger.log(`Gateway running on port ${envs.port}`);
 }

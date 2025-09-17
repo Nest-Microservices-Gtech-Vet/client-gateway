@@ -31,8 +31,5 @@ export class CreateVacunaDto {
     @IsString()
     historiaClinica_id?: string; // ✅ requerido ahora
 
-    // Eliminar este campo si ya no lo usas:
-    // @IsOptional()
-    // @IsString()
-    // numeroConsulta?: string;
+ 
 }

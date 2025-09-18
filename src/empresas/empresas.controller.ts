@@ -20,19 +20,6 @@ const saveFoto = (file: Express.Multer.File) => {
   const rutaLogo = path.join(process.cwd(), 'uploads', 'logos');
 
 
-<<<<<<< Updated upstream
-  if (!fs.existsSync(rutaLogo)) {
-    fs.mkdirSync(rutaLogo, { recursive: true });
-  }
-
-  console.log('📂 Ruta donde se guardará la imagen:', rutaLogo);
-
-  const filePath = path.join(rutaLogo, file.filename);
-  fs.writeFileSync(filePath, file.buffer);
-};
-
-=======
->>>>>>> Stashed changes
 @Controller('empresas')
 export class EmpresasController {
   constructor(
@@ -42,113 +29,21 @@ export class EmpresasController {
   @Post()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-<<<<<<< Updated upstream
-  @UseInterceptors(FileInterceptor('foto', fotoLogoUploadOptions))
-  createEmp(@UploadedFile() foto: Express.Multer.File, @Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
-    console.log('Enviando mensaje a create_empresa', createEmpresaDto);
-
-    let fileName: string | undefined;
-
-    if (foto) {
-      fileName = foto.filename;
-    }
-
-    const payload = {
-      createEmpresaDto: {
-        ...createEmpresaDto,
-        emp_foto: fileName,
-      },
-      user,
-    };
-
-=======
   createEmp(@Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
     const payload = { ...createEmpresaDto, createdBy: user.id };
->>>>>>> Stashed changes
     return this.client.send({ cmd: 'create_empresa' }, payload);
   }
 
   @Get()
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-<<<<<<< Updated upstream
-  findAllEmpresas(
-    @Query() paginationDto: PaginationDto,
-    @User() user: CurrentUser,
-    @Token() token: string
-  ) {
-    const payload = {
-      paginationDto,
-
-
-    }
-    return this.client.send({ cmd: 'findAll_empresas' }, payload);
-=======
   findAllEmpresas(@Query() paginationDto: PaginationDto) {
     return this.client.send({ cmd: 'findAll_empresas' }, { paginationDto });
->>>>>>> Stashed changes
   }
 
   @Get('inactivas')
   @UseGuards(AuthGuard, RolesGuard)
   @Roles('SUPERADMIN')
-<<<<<<< Updated upstream
-  findAllEmpresasInactivas(
-    @Query() paginationDto: PaginationDto,
-    @User() user: CurrentUser,
-    @Token() token: string
-  ) {
-    const payload = {
-      paginationDto,
-
-
-    }
-    return this.client.send({ cmd: 'findAll_empresas.inac' }, payload);
-  }
-
-  // @Get(':id')
-  // @UseGuards(AuthGuard, RolesGuard)
-  // @Roles('SUPERADMIN', 'ADMIN')
-  // async findOne(@Param('id') emp_id: string,
-  //   user: CurrentUser,
-  //   @Token() token: string
-  // ) {
-  //   return this.client.send({ cmd: 'findOne_empresa' }, { emp_id: Number(emp_id) })
-  //     .pipe(
-  //       catchError(err => { throw new RpcException(err) })
-  //     );
-  // }
-
-  @Patch(':id')
-  @UseGuards(AuthGuard, RolesGuard)
-  @Roles('SUPERADMIN')
-  @UseInterceptors(FileInterceptor('foto', fotoLogoUploadOptions))
-  updateEmpresa(
-    @Param('id', ParseIntPipe) emp_id: number,
-    @UploadedFile() foto: Express.Multer.File,
-    @Body() updateEmpresaDto: UpdateEmpresaDto,
-    @User() user: CurrentUser, @Token() token: string) {
-    let fileName: string | undefined = updateEmpresaDto.emp_foto;
-
-    if (foto) {
-      fileName = foto.filename; // ✅ si viene nueva foto, reemplaza
-    }
-
-    const payload = {
-      emp_id,
-      updatedBy: user.id,
-      updateEmpresaDto: {
-        ...updateEmpresaDto,
-        emp_foto: fileName,
-      },
-    };
-
-    return this.client.send({ cmd: 'update_empresa' }, payload).pipe(
-      catchError((err) => {
-        throw new RpcException(err);
-      }),
-    );
-=======
   findAllEmpresasInactivas(@Query() paginationDto: PaginationDto) {
     return this.client.send({ cmd: 'findAll_empresas.inac' }, { paginationDto });
   }
@@ -157,7 +52,6 @@ export class EmpresasController {
   async asignarUsuarios(@Body() dto: CreateEmpresaUsuarioDto) {
     return this.client.send({ cmd: 'asignar-usuarios-empresa' }, dto)
       .pipe(catchError(err => { throw new RpcException(err) }));
->>>>>>> Stashed changes
   }
 
   @Get('mis-empresas/:id')
@@ -176,9 +70,6 @@ export class EmpresasController {
     ).toPromise();
   }
 
-<<<<<<< Updated upstream
-
-=======
   @Get(':id')
   async findEmpresa(@Param('id', ParseIntPipe) id: number) {
     const empresa = await this.client.send('empresas.findById', id).toPromise();
@@ -188,7 +79,6 @@ export class EmpresasController {
       : [];
     return { ...empresa, admins };
   }
->>>>>>> Stashed changes
 
   @Patch(':id')
   @UseGuards(AuthGuard, RolesGuard)

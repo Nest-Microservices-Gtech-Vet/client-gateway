@@ -17,85 +17,211 @@ import { FileInterceptor } from '@nestjs/platform-express';
 import { fotoLogoUploadOptions } from 'src/gestion-veterinaria/mascotas/utils/foto-upload.options';
 
 const saveFoto = (file: Express.Multer.File) => {
-  const rutaLogo = path.join(process.cwd(), 'uploads', 'logos');}
+  const rutaLogo = path.join(process.cwd(), 'uploads', 'logos');
 
 
-  @Controller('empresas')
-  export class EmpresasController {
-    constructor(
-      @Inject(NATS_SERVICE) private readonly client: ClientProxy
-    ) { }
-
-    @Post()
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('SUPERADMIN')
-    createEmp(@Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
-      const payload = { ...createEmpresaDto, createdBy: user.id };
-      return this.client.send({ cmd: 'create_empresa' }, payload);
-    }
-
-    @Get()
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('SUPERADMIN')
-    findAllEmpresas(@Query() paginationDto: PaginationDto) {
-      return this.client.send({ cmd: 'findAll_empresas' }, { paginationDto });
-    }
-
-    @Get('inactivas')
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('SUPERADMIN')
-    findAllEmpresasInactivas(@Query() paginationDto: PaginationDto) {
-      return this.client.send({ cmd: 'findAll_empresas.inac' }, { paginationDto });
-    }
-
-    @Post('asignar-usuarios')
-    async asignarUsuarios(@Body() dto: CreateEmpresaUsuarioDto) {
-      return this.client.send({ cmd: 'asignar-usuarios-empresa' }, dto)
-        .pipe(catchError(err => { throw new RpcException(err) }));
-    }
-
-    @Get('mis-empresas/:id')
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('ADMIN', 'USUARIO')
-    async obtenerEmpresasPorId(@Param('id') id: string) {
-      const user = { id: parseInt(id) };
-      return this.client.send('empresas.mis-empresas', { user }).toPromise();
-    }
-
-    @Post(':id/asignar-usuarios')
-    async asignarUsuariosEmpresa(@Param('id', ParseIntPipe) id: number, @Body() body: { usuarioIds: number[] }) {
-      return this.client.send(
-        { cmd: 'asignar-usuarios-empresa' },
-        { empresaId: id, usuarioIds: body.usuarioIds }
-      ).toPromise();
-    }
-
-    @Get(':id')
-    async findEmpresa(@Param('id', ParseIntPipe) id: number) {
-      const empresa = await this.client.send('empresas.findById', id).toPromise();
-      const usuarioIds = empresa.empresaUsuario.map((eu) => eu.usuarioId);
-      const admins = usuarioIds.length
-        ? await this.client.send('usuarios.getByIds', { ids: usuarioIds }).toPromise()
-        : [];
-      return { ...empresa, admins };
-    }
-
-    @Patch(':id')
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('SUPERADMIN')
-    updateEmpresa(@Param('id', ParseIntPipe) emp_id: number, @Body() updateEmpresaDto: UpdateEmpresaDto, @User() user: CurrentUser) {
-      return this.client.send({ cmd: 'update_empresa' }, { emp_id, updatedBy: user.id, updateEmpresaDto })
-        .pipe(catchError(err => { throw new RpcException(err) }));
-    }
-
-    @Delete(':id')
-    @UseGuards(AuthGuard, RolesGuard)
-    @Roles('SUPERADMIN')
-    removeEmpresa(@Param('id', ParseIntPipe) emp_id: number, @User() user: CurrentUser) {
-      return this.client.send({ cmd: 'delete_empresa' }, { emp_id, updatedBy: user.id })
-        .pipe(catchError(err => throwError(() => new RpcException('Error al querer eliminar la empresa'))));
-    }
-
-    // 👇 ESTA VA AL FINAL
-
+  if (!fs.existsSync(rutaLogo)) {
+    fs.mkdirSync(rutaLogo, { recursive: true });
   }
+
+  console.log('📂 Ruta donde se guardará la imagen:', rutaLogo);
+
+  const filePath = path.join(rutaLogo, file.filename);
+  fs.writeFileSync(filePath, file.buffer);
+};
+
+@Controller('empresas')
+export class EmpresasController {
+  constructor(
+    @Inject(NATS_SERVICE) private readonly client: ClientProxy
+  ) { }
+
+
+  @Post()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  @UseInterceptors(FileInterceptor('foto', fotoLogoUploadOptions))
+  createEmp(@UploadedFile() foto: Express.Multer.File, @Body() createEmpresaDto: CreateEmpresaDto, @User() user: CurrentUser, @Token() token: string) {
+    console.log('Enviando mensaje a create_empresa', createEmpresaDto);
+
+    let fileName: string | undefined;
+
+    if (foto) {
+      fileName = foto.filename;
+    }
+
+    const payload = {
+      createEmpresaDto: {
+        ...createEmpresaDto,
+        emp_foto: fileName,
+      },
+      user,
+    };
+
+    return this.client.send({ cmd: 'create_empresa' }, payload);
+  }
+
+  @Get()
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  findAllEmpresas(
+    @Query() paginationDto: PaginationDto,
+    @User() user: CurrentUser,
+    @Token() token: string
+  ) {
+    const payload = {
+      paginationDto,
+
+
+    }
+    return this.client.send({ cmd: 'findAll_empresas' }, payload);
+  }
+
+
+  @Get('inactivas')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  findAllEmpresasInactivas(
+    @Query() paginationDto: PaginationDto,
+    @User() user: CurrentUser,
+    @Token() token: string
+  ) {
+    const payload = {
+      paginationDto,
+
+
+    }
+    return this.client.send({ cmd: 'findAll_empresas.inac' }, payload);
+  }
+
+  // @Get(':id')
+  // @UseGuards(AuthGuard, RolesGuard)
+  // @Roles('SUPERADMIN', 'ADMIN')
+  // async findOne(@Param('id') emp_id: string,
+  //   user: CurrentUser,
+  //   @Token() token: string
+  // ) {
+  //   return this.client.send({ cmd: 'findOne_empresa' }, { emp_id: Number(emp_id) })
+  //     .pipe(
+  //       catchError(err => { throw new RpcException(err) })
+  //     );
+  // }
+
+  @Patch(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  @UseInterceptors(FileInterceptor('foto', fotoLogoUploadOptions))
+  updateEmpresa(
+    @Param('id', ParseIntPipe) emp_id: number,
+    @UploadedFile() foto: Express.Multer.File,
+    @Body() updateEmpresaDto: UpdateEmpresaDto,
+    @User() user: CurrentUser, @Token() token: string) {
+    let fileName: string | undefined = updateEmpresaDto.emp_foto;
+
+    if (foto) {
+      fileName = foto.filename; // ✅ si viene nueva foto, reemplaza
+    }
+
+    const payload = {
+      emp_id,
+      updatedBy: user.id,
+      updateEmpresaDto: {
+        ...updateEmpresaDto,
+        emp_foto: fileName,
+      },
+    };
+
+    return this.client.send({ cmd: 'update_empresa' }, payload).pipe(
+      catchError((err) => {
+        throw new RpcException(err);
+      }),
+    );
+  }
+//aqui empieza borrar
+  @Delete(':id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('SUPERADMIN')
+  removeEmpresa(@Param('id', ParseIntPipe) emp_id: number, @User() user: CurrentUser, @Token() token: string) {
+    return this.client.send({ cmd: 'delete_empresa' }, { emp_id, updatedBy: user.id })
+      .pipe(
+        catchError(err => {
+          console.log('Error al eliminar la empresa:', err);
+          return throwError(() => new RpcException('Error al querer eliminar la empresa'))
+        }
+        )
+      );
+  }
+
+
+  @Get('mis-empresas/:id')
+  @UseGuards(AuthGuard, RolesGuard)
+  @Roles('ADMIN', 'USUARIO')
+  async obtenerEmpresasPorId(@Param('id') id: string) {
+    const user = { id: parseInt(id) };
+    return this.client.send('empresas.mis-empresas', { user }).toPromise();
+  }
+
+
+
+  // @UseGuards(AuthGuard)
+  // @Get('mis-empresas')
+  // //@Roles('ADMIN')
+  // async misEmpresas(@User() user: CurrentUser) {
+  //   console.log('Usuario autenticado:', user);
+  //   return await this.client.send('empresas.mis-empresas', { user }).toPromise();
+  // }
+
+  //************************************************************************************************** */
+  @Post('asignar-usuarios')
+  async asignarUsuarios(
+    @Body() dto: CreateEmpresaUsuarioDto,
+  ) {
+    return this.client.send({ cmd: 'asignar-usuarios-empresa' }, dto).pipe(
+      catchError(err => { throw new RpcException(err) })
+    );
+  }
+  //*********************************************************************************************************** */
+  //*********************************************************************************************************** */
+  @Get(':id')
+  async findEmpresa(@Param('id', ParseIntPipe) id: number) {
+    const empresa = await this.client.send('empresas.findById', id).toPromise();
+
+    const usuarioIds = empresa.empresaUsuario.map((eu) => eu.usuarioId);
+
+    const admins = usuarioIds.length
+      ? await this.client.send('usuarios.getByIds', { ids: usuarioIds }).toPromise()
+      : [];
+
+    return {
+      ...empresa,
+      admins,
+    };
+  }
+
+
+
+  //*********************************************************************************************************** */
+  @Post(':id/asignar-usuarios')
+  async asignarUsuariosEmpresa(
+    @Param('id', ParseIntPipe) id: number,
+    @Body() body: { usuarioIds: number[] },
+  ) {
+    return this.client.send(
+      { cmd: 'asignar-usuarios-empresa' },
+      { empresaId: id, usuarioIds: body.usuarioIds }
+    ).toPromise();
+  }
+
+
+
+
+}
+
+
+
+
+
+
+
+
+

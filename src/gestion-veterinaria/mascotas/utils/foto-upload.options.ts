@@ -25,7 +25,7 @@ export const fotoUploadOptions = {
         cb(null, true);
     },
     limits: {
-        fileSize: 2 * 1024 * 1024, // 2MB
+        fileSize: 50 * 1024 * 1024, // 2MB
     },
 };
 
@@ -53,6 +53,6 @@ export const fotoLogoUploadOptions = {
         cb(null, true);
     },
     limits: {
-        fileSize: 2 * 1024 * 1024, // 2MB
+        fileSize: 100 * 1024 * 1024, // 2MB
     },
 };

@@ -147,6 +147,7 @@ export class VacunaController {
       id: parseInt(id),   // 👈 aquí se pasa el id
       updateVacunaDto: parsedDto,
       fotos,
+      archivosAEliminar: body.archivosAEliminar || [],
       user: { id: user.id },
     };
 

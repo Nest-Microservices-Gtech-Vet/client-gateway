@@ -1,4 +1,5 @@
-import { IsDateString, IsOptional, IsString } from "class-validator";
+import { Type } from "class-transformer";
+import { IsArray, IsDateString, IsInt, IsOptional, IsString } from "class-validator";
 
 export class CreateVacunaDto {
     @IsString()
@@ -35,4 +36,11 @@ export class CreateVacunaDto {
     // @IsOptional()
     // @IsString()
     // numeroConsulta?: string;
+
+    // 👇 Aquí aceptamos lista de IDs a eliminar
+    @IsOptional()
+    @IsArray()
+    @Type(() => Number) // transforma los strings del form-data en number
+    @IsInt({ each: true })
+    archivosAEliminar?: number[];
 }

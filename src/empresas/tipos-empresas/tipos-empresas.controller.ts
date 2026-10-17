@@ -1,7 +1,5 @@
-import { Controller, Get, Post, Body, Patch, Param, Delete, Inject } from '@nestjs/common';
-import { CreateTiposEmpresaDto } from './dto/create-tipos-empresa.dto';
-import { UpdateTiposEmpresaDto } from './dto/update-tipos-empresa.dto';
-import { ClientProxy, Payload } from '@nestjs/microservices';
+import { Controller, Get, Inject } from '@nestjs/common';
+import { ClientProxy } from '@nestjs/microservices';
 import { NATS_SERVICE } from 'src/config';
 
 @Controller('tipos-empresas')
@@ -10,13 +8,9 @@ export class TiposEmpresasController {
         @Inject(NATS_SERVICE) private readonly client: ClientProxy
       ) { }
 
-  @Post()
-  createTipoEmp(@Body() createTiposEmpresasDto: CreateTiposEmpresaDto) {
-    return this.client.send({ cmd: 'create_tipoEmp' },createTiposEmpresasDto)
-  }
-
+  // Devuelve los tipos de empresa ya usados por las empresas registradas (empresas-ms)
   @Get()
-  getTipoEmp(@Payload() any){
+  getTipoEmp(){
     return this.client.send({ cmd: 'get_tipoEmp'},{});
   }
 

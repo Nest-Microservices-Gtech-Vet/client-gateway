@@ -51,15 +51,13 @@ export class CreateEmpresaDto {
     @IsBoolean()
     activo?: boolean;
 
-    @IsOptional()
-    @IsDate()
+    @IsDate({ message: 'fecha_inicio es obligatoria y debe ser una fecha válida' })
     @Type(() => Date)
-    fecha_inicio?: Date;
+    fecha_inicio: Date;
 
-    @IsOptional()
-    @IsDate()
+    @IsDate({ message: 'fecha_fin es obligatoria y debe ser una fecha válida' })
     @Type(() => Date)
-    fecha_fin?: Date;
+    fecha_fin: Date;
 
 
 
